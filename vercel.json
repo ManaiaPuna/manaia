@@ -9,7 +9,8 @@
     { "src": "creator.png", "use": "@vercel/static" },
     { "src": "shop-tshirt.png", "use": "@vercel/static" },
     { "src": "shop-vinyl.png", "use": "@vercel/static" },
-    { "src": "shop-script.png", "use": "@vercel/static" }
+    { "src": "shop-script.png", "use": "@vercel/static" },
+    { "src": "poster.jpg", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/notify", "dest": "/api/notify.js" },
