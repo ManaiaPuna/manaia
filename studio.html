@@ -426,36 +426,56 @@
           </div>
         </div>
         <div style="border-top:1px solid var(--rule)">
+          <!-- Column headers -->
           <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--sub)"></div>
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--sub);text-align:right">Episode</div>
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--sub);text-align:right">Series</div>
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--sub);text-align:right">Shop</div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--text)" id="calc-tickets-label">Tickets</div>
-            <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-ep-gross">$8,750</div>
-            <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-series-gross">$87,500</div>
-            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
+
+          <!-- Tīkiti | Tickets — expandable -->
+          <div style="border-bottom:1px solid var(--rule)">
+            <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;cursor:pointer" onclick="toggleTicketBreakdown()">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:11px;font-weight:500;color:var(--text)">Tīkiti <span style="font-weight:300;color:var(--sub)">| Tickets</span></span>
+                <span id="ticket-chevron" style="font-size:9px;color:var(--sub);transition:transform 0.2s">▾</span>
+              </div>
+              <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-ep-gross">$8,750</div>
+              <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-series-gross">$87,500</div>
+              <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
+            </div>
+            <!-- Ticket breakdown — hidden by default -->
+            <div id="ticket-breakdown" style="display:none;padding:0 0 10px 0">
+              <div id="ticket-breakdown-rows"></div>
+            </div>
           </div>
+
+          <!-- Tō | You Get (tickets) -->
           <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--text)">Your cut <span id="calc-cut-pct-label" style="color:var(--accent)"></span></div>
+            <div style="font-size:11px;font-weight:500;color:var(--text)">Tō <span style="font-weight:300;color:var(--sub)">| You Get</span> <span id="calc-cut-pct-label" style="color:var(--accent);font-size:10px"></span></div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-ep-cut">$6,125</div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-series-cut">$61,250</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
           </div>
+
+          <!-- Hoko | Shop -->
           <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--text)">Shop</div>
+            <div style="font-size:11px;font-weight:500;color:var(--text)">Hoko <span style="font-weight:300;color:var(--sub)">| Shop</span></div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-shop-gross">$7,250</div>
           </div>
+
+          <!-- Tō | You Get (shop) -->
           <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--text)">Your cut <span id="calc-shop-pct-label" style="color:var(--accent)"></span></div>
+            <div style="font-size:11px;font-weight:500;color:var(--text)">Tō <span style="font-weight:300;color:var(--sub)">| You Get</span> <span id="calc-shop-pct-label" style="color:var(--accent);font-size:10px"></span></div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--sub)">—</div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-shop-cut">$5,075</div>
           </div>
+
+          <!-- Your total -->
           <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0">
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text)">Your total</div>
             <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-ep">$6,125</div>
@@ -1289,6 +1309,14 @@
     setTimeout(() => { target.innerHTML = ''; }, 1000);
   }
 
+  // ─── TICKET BREAKDOWN TOGGLE ─────────────────────
+  window._ticketOpen = false;
+  function toggleTicketBreakdown() {
+    window._ticketOpen = !window._ticketOpen;
+    document.getElementById('ticket-breakdown').style.display = window._ticketOpen ? 'block' : 'none';
+    document.getElementById('ticket-chevron').style.transform = window._ticketOpen ? 'rotate(180deg)' : '';
+  }
+
   // ─── REVENUE POTENTIAL CALCULATOR ────────────────
   window._calcRate = 1;
 
@@ -1334,7 +1362,26 @@
 
     const fmt = v => '$' + Math.round(v).toLocaleString();
 
-    document.getElementById('calc-tickets-label').textContent = soldTickets.toLocaleString() + ' tickets × $3.50';
+    // Ticket breakdown rows — 3 price tiers
+    const tiers = [
+      { label: 'Early Bird', price: 2.50, share: 0.3 },
+      { label: 'Standard',   price: 3.50, share: 0.5 },
+      { label: 'Late',       price: 5.00, share: 0.2 },
+    ];
+    const breakdownEl = document.getElementById('ticket-breakdown-rows');
+    if (breakdownEl) {
+      breakdownEl.innerHTML = tiers.map(t => {
+        const qty = Math.round(soldTickets * t.share);
+        const gross = qty * t.price;
+        const cut = gross * rhPct / 100;
+        return `<div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:6px 0 6px 16px;border-top:1px solid var(--rule)">
+          <div style="font-size:10px;font-weight:300;color:var(--sub)">${t.label} · ${qty.toLocaleString()} × $${t.price.toFixed(2)}</div>
+          <div style="font-family:var(--mono);font-size:11px;text-align:right;color:var(--sub)">${fmt(gross)}</div>
+          <div style="font-family:var(--mono);font-size:11px;text-align:right;color:var(--sub)">×10</div>
+          <div style="font-family:var(--mono);font-size:11px;text-align:right;color:var(--dim)">—</div>
+        </div>`;
+      }).join('');
+    }
     document.getElementById('calc-ep-gross').textContent = fmt(epGross);
     document.getElementById('calc-series-gross').textContent = fmt(seriesGross);
     document.getElementById('calc-ep-cut').textContent = fmt(epCut);
