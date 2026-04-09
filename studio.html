@@ -244,6 +244,12 @@
     .step.active { color: var(--text); border-bottom-color: var(--accent); }
     .step.done { color: var(--sub); border-bottom-color: var(--sub); }
 
+    /* ── LIVE PULSE ── */
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
     /* ── RIGHTS HOLDER BANNER ── */
     .rh-banner {
       padding: 16px; background: var(--raised); border-left: 3px solid var(--accent);
@@ -267,7 +273,7 @@
     <!-- ═══ SCREEN: AUTH ═══ -->
     <div class="screen active" id="screen-auth">
       <div class="auth-hero">
-        <div class="lbl" style="margin-bottom:12px">Rights Holder Portal</div>
+        <div class="lbl" style="margin-bottom:12px">Owner Portal</div>
         <div class="auth-title">Your work.<br>Your terms.</div>
         <div class="auth-sub" style="margin-top:12px">Manage your project, set revenue splits,<br>and invite your team.</div>
       </div>
@@ -288,7 +294,7 @@
       </div>
 
       <div class="auth-disclaimer" style="margin-top:40px">
-        <strong>Rights Holder access only.</strong> This portal is for the person or company that owns the intellectual property. By continuing you confirm you hold or represent the rights to the content you upload.
+        <strong>Owner access only.</strong> This portal is for the person or company that owns the intellectual property. By continuing you confirm you hold or represent the rights to the content you upload.
       </div>
     </div>
 
@@ -310,7 +316,7 @@
 
       <!-- Greeting -->
       <div style="padding:32px 0 24px;border-bottom:1px solid var(--rule)">
-        <div class="lbl" style="margin-bottom:8px">Rights Holder Dashboard</div>
+        <div class="lbl" style="margin-bottom:8px">Owner Dashboard</div>
         <div class="dash-title" id="dash-greeting">Kia ora.</div>
       </div>
 
@@ -338,6 +344,62 @@
         </div>
       </div>
 
+      <!-- Revenue Potential Calculator -->
+      <div style="margin:0 0 32px;border-top:1px solid var(--rule);padding-top:24px" id="revenue-calc">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="lbl">Pūtea Tūāhua · Revenue Potential</div>
+          <div style="display:flex;gap:4px" id="calc-btns">
+            <button onclick="setCalcRate(1)" data-rate="1" style="font-family:var(--sans);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer;transition:all 0.15s">100%</button>
+            <button onclick="setCalcRate(0.8)" data-rate="0.8" style="font-family:var(--sans);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--rule);background:transparent;color:var(--sub);cursor:pointer;transition:all 0.15s">80%</button>
+            <button onclick="setCalcRate(0.5)" data-rate="0.5" style="font-family:var(--sans);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--rule);background:transparent;color:var(--sub);cursor:pointer;transition:all 0.15s">50%</button>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--rule)">
+          <!-- Column headers -->
+          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim)"></div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Per Episode</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Full Series</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Shop</div>
+          </div>
+          <!-- Tickets row -->
+          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)" id="calc-tickets-label">Tickets (2,500 × $3.50)</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-ep-gross">$8,750</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-series-gross">$87,500</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
+          </div>
+          <!-- Your cut (tickets) -->
+          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)" id="calc-cut-label">Your cut at <span id="calc-cut-pct-label">70</span>%</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-ep-cut">$6,125</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-series-cut">$61,250</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
+          </div>
+          <!-- Shop row -->
+          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)">Shop (3 items × 50 units)</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-shop-gross">$7,250</div>
+          </div>
+          <!-- Your cut (shop) -->
+          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)">Your cut at <span id="calc-shop-pct-label">70</span>%</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
+            <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-shop-cut">$5,075</div>
+          </div>
+          <!-- Total row -->
+          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0">
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--sub)">Total potential</div>
+            <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-ep">$6,125</div>
+            <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-series">$61,250</div>
+            <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-shop">$5,075</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Projects -->
       <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
         <div class="lbl">Projects</div>
@@ -347,7 +409,13 @@
 
       <!-- Team status -->
       <div style="margin-top:32px;margin-bottom:8px">
-        <div class="lbl" style="margin-bottom:16px">Team Status</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="lbl">Team Status</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="width:7px;height:7px;border-radius:50%;background:#5CB85C;display:inline-block;animation:pulse-live 2s infinite"></span>
+            <span style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#5CB85C">Live</span>
+          </div>
+        </div>
         <div id="team-status-list"></div>
       </div>
 
@@ -427,7 +495,7 @@
           <textarea class="field-input" id="proj-desc" placeholder="A Māori detective in contemporary Auckland..."></textarea>
         </div>
         <div class="field">
-          <label class="field-label" for="proj-rh-name">Rights holder name</label>
+          <label class="field-label" for="proj-rh-name">Your name</label>
           <input class="field-input" type="text" id="proj-rh-name" placeholder="Big River Creative Ltd">
           <div class="field-hint">The person or company that legally owns this IP.</div>
         </div>
@@ -451,7 +519,7 @@
         <div class="split-section">
           <div class="split-section-header">
             <div>
-              <div class="split-section-title">Rights Holder</div>
+              <div class="split-section-title">Owner</div>
               <div style="font-size:11px;font-weight:300;color:var(--sub);margin-top:3px" id="rh-name-label">You</div>
             </div>
             <div style="display:flex;align-items:baseline;gap:4px">
@@ -723,6 +791,27 @@
       ...(p.crewMembers || []).map(m => ({ ...m, project: p.title }))
     ]);
     renderTeamStatus(allMembers);
+
+    // ── Render revenue calculator ──
+    renderCalc();
+
+    // ── Auto-refresh team status every 30s while dashboard is visible ──
+    if (window._statusPollInterval) clearInterval(window._statusPollInterval);
+    window._statusPollInterval = setInterval(async () => {
+      if (!document.getElementById('screen-dashboard').classList.contains('active')) return;
+      try {
+        const res = await fetch('/api/studio-project?userId=' + state.user.id);
+        const data = await res.json();
+        if (data.projects) {
+          state.projects = data.projects;
+          const refreshedMembers = state.projects.flatMap(p => [
+            ...(p.ktMembers || []).map(m => ({ ...m, project: p.title })),
+            ...(p.crewMembers || []).map(m => ({ ...m, project: p.title }))
+          ]);
+          renderTeamStatus(refreshedMembers);
+        }
+      } catch(_) {}
+    }, 30000);
   }
 
   function renderTeamStatus(members) {
@@ -898,7 +987,7 @@
       </div>
       <div style="padding:20px 0;border-bottom:1px solid var(--rule)">
         <div class="lbl" style="margin-bottom:12px">Revenue Splits</div>
-        <div class="pool-row"><div class="pool-name">${p.rhName} (Rights Holder)</div><div class="pool-pct">${p.rhPct}%</div></div>
+        <div class="pool-row"><div class="pool-name">${p.rhName} (Owner)</div><div class="pool-pct">${p.rhPct}%</div></div>
         <div class="pool-row"><div class="pool-name">Rōpū Matua · Key Team (${p.ktMembers.length} members)</div><div class="pool-pct">${p.ktPct}%</div></div>
         <div class="pool-row"><div class="pool-name">Kaimahi · Crew (${p.crewMembers.length} members)</div><div class="pool-pct">${p.crewPct}%</div></div>
       </div>
@@ -957,7 +1046,7 @@
       <div class="project-detail-type">${p.rhName} · ${p.locked ? '🔒 Locked' : 'Open'}</div>`;
 
     document.getElementById('detail-splits').innerHTML = `
-      <div class="pool-row"><div class="pool-name">Rights Holder</div><div class="pool-pct">${p.rhPct}%</div></div>
+      <div class="pool-row"><div class="pool-name">Owner</div><div class="pool-pct">${p.rhPct}%</div></div>
       <div class="pool-row"><div class="pool-name">Rōpū Matua · Key Team</div><div class="pool-pct">${p.ktPct}%</div></div>
       <div class="pool-row"><div class="pool-name">Kaimahi · Crew</div><div class="pool-pct">${p.crewPct}%</div></div>`;
 
@@ -1081,6 +1170,65 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ─── REVENUE POTENTIAL CALCULATOR ────────────────
+  window._calcRate = 1;
+
+  function getCalcRhPct() {
+    // Use first project's rhPct, or default 70
+    if (state.projects && state.projects.length > 0 && state.projects[0].rhPct) {
+      return state.projects[0].rhPct;
+    }
+    return 70;
+  }
+
+  function setCalcRate(rate) {
+    window._calcRate = rate;
+    // Update button styles
+    document.querySelectorAll('#calc-btns button').forEach(btn => {
+      const br = parseFloat(btn.dataset.rate);
+      const isActive = Math.abs(br - rate) < 0.001;
+      btn.style.background = isActive ? 'var(--accent)' : 'transparent';
+      btn.style.color = isActive ? 'var(--bg)' : 'var(--sub)';
+      btn.style.borderColor = isActive ? 'var(--accent)' : 'var(--rule)';
+    });
+    renderCalc();
+  }
+
+  function renderCalc() {
+    const rate = window._calcRate || 1;
+    const rhPct = getCalcRhPct();
+    const tickets = 2500;
+    const epPrice = 3.50;
+    const seriesEpisodes = 10;
+    // Shop: T-shirt $55 + Vinyl $65 + Script $25 = $145 per set, 50 units each item (3 items)
+    const shopItems = 3;
+    const shopUnits = 50;
+    const shopAvg = (55 + 65 + 25) / 3; // avg per item per unit
+    const shopGross = shopItems * shopUnits * shopAvg; // 3 * 50 * 48.33 ≈ 7250
+
+    const soldTickets = Math.round(tickets * rate);
+    const epGross = soldTickets * epPrice;
+    const seriesGross = epGross * seriesEpisodes;
+    const epCut = epGross * rhPct / 100;
+    const seriesCut = seriesGross * rhPct / 100;
+    const shopCut = shopGross * rhPct / 100;
+
+    const fmt = v => '$' + Math.round(v).toLocaleString();
+
+    document.getElementById('calc-tickets-label').textContent = 'Tickets (' + soldTickets.toLocaleString() + ' × $3.50)';
+    document.getElementById('calc-ep-gross').textContent = fmt(epGross);
+    document.getElementById('calc-series-gross').textContent = fmt(seriesGross);
+    document.getElementById('calc-ep-cut').textContent = fmt(epCut);
+    document.getElementById('calc-series-cut').textContent = fmt(seriesCut);
+    document.getElementById('calc-shop-gross').textContent = fmt(shopGross);
+    document.getElementById('calc-shop-cut').textContent = fmt(shopCut);
+    document.getElementById('calc-cut-pct-label').textContent = rhPct;
+    document.getElementById('calc-shop-pct-label').textContent = rhPct;
+    document.getElementById('calc-total-ep').textContent = fmt(epCut);
+    document.getElementById('calc-total-series').textContent = fmt(seriesCut);
+    document.getElementById('calc-total-shop').textContent = fmt(shopCut);
   }
 </script>
 
