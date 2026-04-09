@@ -320,10 +320,20 @@
         <div class="dash-title" id="dash-greeting">Kia ora.</div>
       </div>
 
+      <!-- Subscribers — top of dashboard -->
+      <div style="margin-top:24px;padding:20px;background:var(--raised);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="lbl" style="margin-bottom:6px">Subscribers</div>
+          <div style="font-family:var(--mono);font-size:24px;font-weight:500" id="stat-subs">—</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">on the notify list</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="alert('Send update — coming soon')">Send Update →</button>
+      </div>
+
       <!-- Revenue summary -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);margin:24px 0;border:1px solid var(--rule)">
         <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Total Revenue</div>
+          <div class="lbl" style="margin-bottom:10px">Revenue</div>
           <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-revenue">$0</div>
           <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">net sales to date</div>
         </div>
@@ -333,21 +343,21 @@
           <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px" id="stat-cut-pct">at —%</div>
         </div>
         <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Tickets Sold</div>
+          <div class="lbl" style="margin-bottom:10px">Tickets</div>
           <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-tickets">0</div>
           <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px" id="stat-tickets-rem">— remaining</div>
         </div>
         <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Shop Sales</div>
+          <div class="lbl" style="margin-bottom:10px">Shop</div>
           <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-shop">$0</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">0 units sold</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">units sold</div>
         </div>
       </div>
 
       <!-- Revenue Potential Calculator -->
       <div style="margin:0 0 32px;border-top:1px solid var(--rule);padding-top:24px" id="revenue-calc">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="lbl">Pūtea Tūāhua · Revenue Potential</div>
+          <div class="lbl">Pūtea Tūāhua · What's possible</div>
           <div style="display:flex;gap:4px" id="calc-btns">
             <button onclick="setCalcRate(1)" data-rate="1" style="font-family:var(--sans);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer;transition:all 0.15s">100%</button>
             <button onclick="setCalcRate(0.8)" data-rate="0.8" style="font-family:var(--sans);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--rule);background:transparent;color:var(--sub);cursor:pointer;transition:all 0.15s">80%</button>
@@ -355,49 +365,55 @@
           </div>
         </div>
         <div style="border-top:1px solid var(--rule)">
-          <!-- Column headers -->
-          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule)">
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim)"></div>
-            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Per Episode</div>
-            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Full Series</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Episode</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Series</div>
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Shop</div>
           </div>
-          <!-- Tickets row -->
-          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--sub)" id="calc-tickets-label">Tickets (2,500 × $3.50)</div>
+          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)" id="calc-tickets-label">Tickets</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-ep-gross">$8,750</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-series-gross">$87,500</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
           </div>
-          <!-- Your cut (tickets) -->
-          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--sub)" id="calc-cut-label">Your cut at <span id="calc-cut-pct-label">70</span>%</div>
+          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)">Your cut <span id="calc-cut-pct-label" style="color:var(--accent)"></span></div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-ep-cut">$6,125</div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-series-cut">$61,250</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
           </div>
-          <!-- Shop row -->
-          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--sub)">Shop (3 items × 50 units)</div>
+          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)">Shop</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right" id="calc-shop-gross">$7,250</div>
           </div>
-          <!-- Your cut (shop) -->
-          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:11px;font-weight:300;color:var(--sub)">Your cut at <span id="calc-shop-pct-label">70</span>%</div>
+          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:11px;font-weight:300;color:var(--sub)">Your cut <span id="calc-shop-pct-label" style="color:var(--accent)"></span></div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
             <div style="font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)">—</div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--accent);text-align:right" id="calc-shop-cut">$5,075</div>
           </div>
-          <!-- Total row -->
-          <div style="display:grid;grid-template-columns:1fr 100px 110px 90px;gap:8px;padding:10px 0">
-            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--sub)">Total potential</div>
+          <div style="display:grid;grid-template-columns:1fr 90px 100px 80px;gap:8px;padding:10px 0">
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text)">Your total</div>
             <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-ep">$6,125</div>
             <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-series">$61,250</div>
             <div style="font-family:var(--mono);font-size:12px;font-weight:500;text-align:right" id="calc-total-shop">$5,075</div>
           </div>
         </div>
+      </div>
+
+      <!-- Team status -->
+      <div style="margin-bottom:32px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="lbl">Team</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="width:7px;height:7px;border-radius:50%;background:#5CB85C;display:inline-block;animation:pulse-live 2s infinite"></span>
+            <span style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#5CB85C">Live</span>
+          </div>
+        </div>
+        <div id="team-status-list"></div>
       </div>
 
       <!-- Projects -->
@@ -407,20 +423,8 @@
       </div>
       <div id="project-list"></div>
 
-      <!-- Team status -->
-      <div style="margin-top:32px;margin-bottom:8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="lbl">Team Status</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="width:7px;height:7px;border-radius:50%;background:#5CB85C;display:inline-block;animation:pulse-live 2s infinite"></span>
-            <span style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#5CB85C">Live</span>
-          </div>
-        </div>
-        <div id="team-status-list"></div>
-      </div>
-
       <!-- Shop -->
-      <div style="margin-top:32px">
+      <div style="margin-top:32px;margin-bottom:32px">
         <div class="lbl" style="margin-bottom:16px">Hoko | Shop</div>
         <div style="border-top:1px solid var(--rule)">
           <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)">
@@ -429,31 +433,21 @@
             <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Revenue</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:13px;font-weight:400">Series 1 Art Print</div>
+            <div style="font-size:13px;font-weight:400">T-Shirt</div>
             <div style="font-family:var(--mono);font-size:13px;text-align:right;color:var(--sub)">0 / 50</div>
             <div style="font-family:var(--mono);font-size:13px;text-align:right">$0</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:13px;font-weight:400">Original Score</div>
+            <div style="font-size:13px;font-weight:400">Vinyl</div>
             <div style="font-family:var(--mono);font-size:13px;text-align:right;color:var(--sub)">0 / 50</div>
             <div style="font-family:var(--mono);font-size:13px;text-align:right">$0</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)">
-            <div style="font-size:13px;font-weight:400">EP.01 Shooting Script</div>
+            <div style="font-size:13px;font-weight:400">Script</div>
             <div style="font-family:var(--mono);font-size:13px;text-align:right;color:var(--sub)">0 / 50</div>
             <div style="font-family:var(--mono);font-size:13px;text-align:right">$0</div>
           </div>
         </div>
-      </div>
-
-      <!-- Subscribers -->
-      <div style="margin-top:32px;padding:20px;background:var(--raised);display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div class="lbl" style="margin-bottom:6px">Subscribers</div>
-          <div style="font-family:var(--mono);font-size:24px;font-weight:500" id="stat-subs">—</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">on the notify list</div>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="alert('Send update — coming soon')">Send Update →</button>
       </div>
 
     </div>
@@ -1217,15 +1211,15 @@
 
     const fmt = v => '$' + Math.round(v).toLocaleString();
 
-    document.getElementById('calc-tickets-label').textContent = 'Tickets (' + soldTickets.toLocaleString() + ' × $3.50)';
+    document.getElementById('calc-tickets-label').textContent = soldTickets.toLocaleString() + ' tickets × $3.50';
     document.getElementById('calc-ep-gross').textContent = fmt(epGross);
     document.getElementById('calc-series-gross').textContent = fmt(seriesGross);
     document.getElementById('calc-ep-cut').textContent = fmt(epCut);
     document.getElementById('calc-series-cut').textContent = fmt(seriesCut);
     document.getElementById('calc-shop-gross').textContent = fmt(shopGross);
     document.getElementById('calc-shop-cut').textContent = fmt(shopCut);
-    document.getElementById('calc-cut-pct-label').textContent = rhPct;
-    document.getElementById('calc-shop-pct-label').textContent = rhPct;
+    document.getElementById('calc-cut-pct-label').textContent = rhPct + '%';
+    document.getElementById('calc-shop-pct-label').textContent = rhPct + '%';
     document.getElementById('calc-total-ep').textContent = fmt(epCut);
     document.getElementById('calc-total-series').textContent = fmt(seriesCut);
     document.getElementById('calc-total-shop').textContent = fmt(shopCut);
