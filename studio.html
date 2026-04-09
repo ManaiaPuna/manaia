@@ -401,23 +401,23 @@
             <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">to date</div>
           </div>
           <div style="background:var(--bg);padding:16px 14px">
-            <div class="lbl" style="margin-bottom:8px">Subscribers</div>
+            <div class="lbl" style="margin-bottom:8px">Hapori <span style="font-weight:300;opacity:0.6">| Subs</span></div>
             <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-subs">—</div>
             <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">notify list</div>
           </div>
           <div style="background:var(--bg);padding:16px 14px">
-            <div class="lbl" style="margin-bottom:8px">Tickets</div>
+            <div class="lbl" style="margin-bottom:8px">Tīkiti <span style="font-weight:300;opacity:0.6">| Tickets</span></div>
             <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-tickets">0</div>
             <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px" id="stat-tickets-rem">— remaining</div>
           </div>
           <div style="background:var(--bg);padding:16px 14px">
-            <div class="lbl" style="margin-bottom:8px">Shop</div>
+            <div class="lbl" style="margin-bottom:8px">Hoko <span style="font-weight:300;opacity:0.6">| Shop</span></div>
             <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-shop">$0</div>
-            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">units sold</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px" id="stat-shop-units">units sold</div>
           </div>
           <div style="background:var(--bg);padding:16px 14px">
             <div class="lbl" style="margin-bottom:8px">Series Pass</div>
-            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)">0</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-pass">0</div>
             <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">sold</div>
           </div>
         </div>
@@ -836,13 +836,15 @@
     }
 
     // ── STATS (mock — replace with live Stripe + Stream data) ──
-    const MOCK = { revenue: 0, rhPct: state.projects[0]?.rhPct || 60, tickets: 0, ticketsTotal: 2500, shop: 0, subs: 0 };
+    const MOCK = { revenue: 3150, rhPct: state.projects[0]?.rhPct || 60, tickets: 420, ticketsTotal: 2500, shopRevenue: 1260, shopUnits: 18, subs: 1204, pass: 84 };
     document.getElementById('stat-revenue').textContent = '$' + MOCK.revenue.toLocaleString();
     document.getElementById('stat-cut').textContent = '$' + Math.round(MOCK.revenue * MOCK.rhPct / 100).toLocaleString();
     document.getElementById('stat-tickets').textContent = MOCK.tickets.toLocaleString();
     document.getElementById('stat-tickets-rem').textContent = (MOCK.ticketsTotal - MOCK.tickets).toLocaleString() + ' remaining';
-    document.getElementById('stat-shop').textContent = '$' + MOCK.shop.toLocaleString();
+    document.getElementById('stat-shop').textContent = '$' + MOCK.shopRevenue.toLocaleString();
+    document.getElementById('stat-shop-units').textContent = MOCK.shopUnits + ' units sold';
     document.getElementById('stat-subs').textContent = MOCK.subs.toLocaleString();
+    document.getElementById('stat-pass').textContent = MOCK.pass.toLocaleString();
 
     if (state.projects.length === 0) {
       list.innerHTML = `
