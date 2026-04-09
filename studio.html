@@ -96,6 +96,28 @@
     .dash-title { font-family: var(--serif); font-size: 28px; margin-bottom: 4px; }
     .dash-sub { font-size: 12px; font-weight: 300; color: var(--sub); }
 
+    /* dashboard video hero */
+    .dash-hero {
+      position: relative; width: 100%;
+      height: clamp(180px, 30svh, 240px);
+      overflow: hidden; background: #0C0B0A;
+      margin-bottom: 0;
+    }
+    .dash-hero-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center center;
+      opacity: 0.45;
+    }
+    .dash-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, #111110 0%, rgba(10,9,8,.4) 50%, transparent 100%);
+    }
+    .dash-hero-content {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0 24px 20px;
+    }
+
     .project-card {
       padding: 20px 0; border-bottom: 1px solid var(--rule); cursor: pointer;
       transition: opacity 0.15s;
@@ -314,43 +336,55 @@
     <!-- ═══ SCREEN: DASHBOARD ═══ -->
     <div class="screen" id="screen-dashboard">
 
-      <!-- Greeting -->
-      <div style="padding:32px 0 24px;border-bottom:1px solid var(--rule)">
-        <div class="lbl" style="margin-bottom:8px">Owner Dashboard</div>
-        <div class="dash-title" id="dash-greeting">Kia ora.</div>
+      <!-- Video hero -->
+      <div class="dash-hero">
+        <video class="dash-hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="/poster.jpg" aria-hidden="true">
+          <source src="/series.mp4" type="video/mp4">
+        </video>
+        <div class="dash-hero-overlay"></div>
+        <div class="dash-hero-content">
+          <div class="lbl" style="margin-bottom:6px;color:var(--accent)">Owner Dashboard</div>
+          <div class="dash-title" id="dash-greeting">Kia ora.</div>
+        </div>
       </div>
 
-      <!-- Subscribers — top of dashboard -->
-      <div style="margin-top:24px;padding:20px;background:var(--raised);display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div class="lbl" style="margin-bottom:6px">Subscribers</div>
-          <div style="font-family:var(--mono);font-size:24px;font-weight:500" id="stat-subs">—</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">on the notify list</div>
+      <!-- Series title + stats -->
+      <div style="margin:24px 0 0">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px">
+          <div id="dash-series-title" style="font-family:var(--serif);font-size:18px;font-weight:400">—</div>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Send update — coming soon')">Send Update →</button>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="alert('Send update — coming soon')">Send Update →</button>
-      </div>
-
-      <!-- Revenue summary -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);margin:24px 0;border:1px solid var(--rule)">
-        <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Revenue</div>
-          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-revenue">$0</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">net sales to date</div>
-        </div>
-        <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Your Cut</div>
-          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--accent)" id="stat-cut">$0</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px" id="stat-cut-pct">at —%</div>
-        </div>
-        <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Tickets</div>
-          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-tickets">0</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px" id="stat-tickets-rem">— remaining</div>
-        </div>
-        <div style="background:var(--bg);padding:20px 16px">
-          <div class="lbl" style="margin-bottom:10px">Shop</div>
-          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-shop">$0</div>
-          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">units sold</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:24px">
+          <div style="background:var(--bg);padding:16px 14px">
+            <div class="lbl" style="margin-bottom:8px">Revenue</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-revenue">$0</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">to date</div>
+          </div>
+          <div style="background:var(--bg);padding:16px 14px">
+            <div class="lbl" style="margin-bottom:8px">Your Cut</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent)" id="stat-cut">$0</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px" id="stat-cut-pct">at —%</div>
+          </div>
+          <div style="background:var(--bg);padding:16px 14px">
+            <div class="lbl" style="margin-bottom:8px">Subscribers</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-subs">—</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">notify list</div>
+          </div>
+          <div style="background:var(--bg);padding:16px 14px">
+            <div class="lbl" style="margin-bottom:8px">Tickets</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-tickets">0</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px" id="stat-tickets-rem">— remaining</div>
+          </div>
+          <div style="background:var(--bg);padding:16px 14px">
+            <div class="lbl" style="margin-bottom:8px">Shop</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)" id="stat-shop">$0</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">units sold</div>
+          </div>
+          <div style="background:var(--bg);padding:16px 14px">
+            <div class="lbl" style="margin-bottom:8px">Series Pass</div>
+            <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)">0</div>
+            <div style="font-size:10px;font-weight:300;color:var(--sub);margin-top:3px">sold</div>
+          </div>
         </div>
       </div>
 
@@ -727,8 +761,16 @@
       state.projects = JSON.parse(localStorage.getItem('puna_projects') || '[]');
     }
 
+    // ── SERIES TITLE — first project or placeholder ──
+    const seriesTitleEl = document.getElementById('dash-series-title');
+    if (state.projects.length > 0) {
+      seriesTitleEl.textContent = state.projects[0].title;
+    } else {
+      seriesTitleEl.textContent = '—';
+    }
+
     // ── STATS (mock — replace with live Stripe + Stream data) ──
-    const MOCK = { revenue: 0, rhPct: 60, tickets: 0, ticketsTotal: 2500, shop: 0, subs: 0 };
+    const MOCK = { revenue: 0, rhPct: state.projects[0]?.rhPct || 60, tickets: 0, ticketsTotal: 2500, shop: 0, subs: 0 };
     document.getElementById('stat-revenue').textContent = '$' + MOCK.revenue.toLocaleString();
     document.getElementById('stat-cut').textContent = '$' + Math.round(MOCK.revenue * MOCK.rhPct / 100).toLocaleString();
     document.getElementById('stat-cut-pct').textContent = 'at ' + MOCK.rhPct + '%';
