@@ -1083,16 +1083,26 @@
 
 <header class="header">
   <div class="header-inner">
-    <div class="wordmark">Puna</div>
+    <div class="wordmark" onclick="openPunaMenu()" style="cursor:pointer">Puna</div>
     <div class="header-right">
       <button class="tab-btn active" onclick="switchTab('now')" id="tab-now" aria-selected="true">Enjoy</button>
       <button class="tab-btn" onclick="switchTab('series')" id="tab-series" aria-selected="false">Series</button>
       <button class="tab-btn" onclick="switchTab('episodes')" id="tab-episodes" aria-selected="false">Episodes</button>
       <div class="dot-live" aria-hidden="true"></div>
-      <a href="/studio" style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);text-decoration:none;padding:4px 0 4px 12px;border-left:1px solid var(--rule);margin-left:8px;opacity:0.7">Stūdio</a>
     </div>
   </div>
 </header>
+
+<!-- PUNA menu overlay -->
+<div id="puna-menu" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px)" onclick="closePunaMenu()">
+  <div onclick="event.stopPropagation()" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#111110;border:1px solid #252523;width:min(320px,90vw);padding:32px">
+    <div style="font-family:'DM Serif Display',Georgia,serif;font-size:22px;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px">Puna</div>
+    <div style="font-size:11px;font-weight:300;color:#999997;margin-bottom:28px">Manaia · Series 1</div>
+    <div style="height:1px;background:#252523;margin-bottom:24px"></div>
+    <button onclick="closePunaMenu()" style="display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid #252523;padding:14px 0;font-family:inherit;font-size:13px;font-weight:400;color:#E8E4DC;cursor:pointer;letter-spacing:0.3px">Continue watching →</button>
+    <a href="/studio" style="display:block;padding:14px 0;font-size:13px;font-weight:400;color:#999997;text-decoration:none;letter-spacing:0.3px">Stūdio <span style="font-size:10px;font-weight:300;opacity:0.6">— owner login</span></a>
+  </div>
+</div>
 
 <!-- ═══ TAB 1 — NOW ═══════════════════════════════════════ -->
 <div class="tab-panel active" id="panel-now">
@@ -1163,7 +1173,7 @@
           <span class="section-label">Pūrākau | Story</span>
           <span class="synopsis-arrow">↓</span>
         </div>
-        <p class="series-synopsis">Ten two-minute episodes dropping fortnightly. A detective. A missing man. A city that doesn't care.</p>
+        <p class="series-synopsis">Ten episodes. Two minutes each. A detective nobody asked for.</p>
       </div>
 
       <!-- KAI TITO | CREATORS -->
@@ -1248,7 +1258,7 @@
     <div class="ep-hero-content">
       <div style="font-size:9px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-family:var(--sans)">Series 1 — 2026</div>
       <div style="font-family:var(--serif);font-size:clamp(32px,8vw,48px);line-height:0.93;letter-spacing:-1px;margin-bottom:10px">Manaia</div>
-      <p style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--sub);line-height:1.65">Ten episodes. One detective. A city that doesn't care.</p>
+      <p style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--sub);line-height:1.65">Ten episodes. One detective.</p>
     </div>
   </div>
   <div class="wrap" style="padding-bottom:64px">
@@ -1259,9 +1269,9 @@
         <div class="series-pass-eyebrow">Series Pass</div>
         <div class="series-pass-headline">All 10 episodes — one payment</div>
         <ul class="series-pass-benefits">
-          <li>Price locks now — rises as episodes sell out.</li>
-          <li>Instant access when each episode drops.</li>
-          <li>More affordable than buying individually.</li>
+          <li>Price locks now — rises as episodes drop.</li>
+          <li>Instant access to each episode.</li>
+          <li>Cheaper than buying one by one.</li>
         </ul>
         <div style="margin-bottom:14px">
           <div style="height:1px;background:var(--rule);position:relative;margin-bottom:8px">
@@ -1294,7 +1304,7 @@
     <button class="sheet-close" onclick="closeSheet('about')" aria-label="Close">✕</button>
   </div>
   <div class="sheet-body">
-    <p class="sheet-desc">When a young Māori man vanishes from Wellington's waterfront, detective Manaia Parata is the only one who thinks it matters. A ten-part microdrama set in the city that never quite sleeps.</p>
+    <p class="sheet-desc">A young man goes missing from Wellington's waterfront. One detective thinks it matters.</p>
 
     <div id="sheet-watch-btn" style="margin-bottom:12px"></div>
     <div id="sheet-pass-btn" style="margin-bottom:28px">
@@ -1308,7 +1318,7 @@
       </div>
       <div class="sheet-meta-row">
         <span class="sheet-meta-label">Episodes</span>
-        <span class="sheet-meta-val">10 × ~2:30 min — fortnightly drops</span>
+        <span class="sheet-meta-val">10 episodes · 2 min each</span>
       </div>
       <div class="sheet-meta-row">
         <span class="sheet-meta-label">Language</span>
@@ -1316,7 +1326,7 @@
       </div>
       <div class="sheet-meta-row">
         <span class="sheet-meta-label">Rating</span>
-        <span class="sheet-meta-val">M — Suitable for mature audiences</span>
+        <span class="sheet-meta-val">M</span>
       </div>
       <div class="sheet-meta-row">
         <span class="sheet-meta-label">Advisory</span>
@@ -1328,7 +1338,7 @@
       </div>
       <div class="sheet-meta-row">
         <span class="sheet-meta-label">Where</span>
-        <span class="sheet-meta-val">Exclusive to this platform</span>
+        <span class="sheet-meta-val">Puna only</span>
       </div>
     </div>
 
@@ -1407,7 +1417,7 @@
         <div class="shop-item-title">Manaia Co. — T-Shirt</div>
         <div class="shop-item-price">$55</div>
       </div>
-      <div class="shop-item-desc">100% cotton. Black. Manaia Co. label. Sizes S–XXL.</div>
+      <div class="shop-item-desc">Black. 100% cotton. S–XXL.</div>
       <div class="shop-item-meta">
         <span class="shop-badge">Limited run</span>
         <span class="shop-stock">50 remaining</span>
@@ -1424,7 +1434,7 @@
         <div class="shop-item-title">Original Score — Vinyl</div>
         <div class="shop-item-price">$65</div>
       </div>
-      <div class="shop-item-desc">The Manaia Series Recordings. White vinyl, pressed 2024. Fingerprint edition — each copy unique.</div>
+      <div class="shop-item-desc">Original score. White vinyl. 50 pressed.</div>
       <div class="shop-item-meta">
         <span class="shop-badge">Limited — 50 only</span>
         <span class="shop-stock">50 remaining</span>
@@ -1441,7 +1451,7 @@
         <div class="shop-item-title">EP.01 — Shooting Script</div>
         <div class="shop-item-price">$25</div>
       </div>
-      <div class="shop-item-desc">The original shooting script for Episode 1, printed and bound. Hand-numbered, signed by the writer.</div>
+      <div class="shop-item-desc">EP.01 shooting script. Signed. Bound. 50 only.</div>
       <div class="shop-item-meta">
         <span class="shop-badge">Limited — 50 only</span>
         <span class="shop-stock">50 remaining</span>
@@ -1844,6 +1854,15 @@
   }
 
   // ─── INFO SHEETS (About / Cast+Crew) ─────────────────────
+  function openPunaMenu() {
+    document.getElementById('puna-menu').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+  function closePunaMenu() {
+    document.getElementById('puna-menu').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
   function openSheet(name) {
     document.getElementById('sheet-' + name).classList.add('open');
     document.body.style.overflow = 'hidden';
