@@ -279,6 +279,33 @@
     }
     .rh-banner-title { font-size: 11px; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 4px; }
     .rh-banner-body { font-size: 11px; font-weight: 300; color: var(--sub); line-height: 1.65; }
+
+  @media print {
+    body > *:not(#report-print-target) { display: none !important; }
+    #report-print-target {
+      display: block !important;
+      font-family: 'Times New Roman', Times, serif;
+      color: #000; background: #fff;
+      padding: 48px 56px; max-width: 720px; margin: 0 auto;
+    }
+    #report-print-target h1 { font-size: 28px; font-weight: 400; margin: 0 0 4px; }
+    #report-print-target .rpt-sub { font-size: 12px; color: #555; margin-bottom: 36px; font-style: italic; }
+    #report-print-target .rpt-section { margin-bottom: 28px; }
+    #report-print-target .rpt-label { font-family: Arial, sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 10px; }
+    #report-print-target .rpt-rule { border: none; border-top: 1px solid #ddd; margin: 0 0 12px; }
+    #report-print-target .rpt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 1px; border: 1px solid #ddd; margin-bottom: 4px; }
+    #report-print-target .rpt-cell { padding: 12px 14px; border-right: 1px solid #eee; }
+    #report-print-target .rpt-cell:last-child { border-right: none; }
+    #report-print-target .rpt-cell-lbl { font-family: Arial, sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
+    #report-print-target .rpt-cell-val { font-size: 22px; font-weight: 400; }
+    #report-print-target .rpt-cell-sub { font-size: 10px; color: #888; margin-top: 2px; }
+    #report-print-target .rpt-row { display: grid; grid-template-columns: 1fr 90px 100px 80px; padding: 7px 0; border-bottom: 1px solid #eee; font-size: 12px; }
+    #report-print-target .rpt-row-hdr { font-family: Arial, sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #999; }
+    #report-print-target .rpt-num { text-align: right; }
+    #report-print-target .rpt-accent { color: #C77737; }
+    #report-print-target .rpt-team-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eee; font-size: 12px; }
+    #report-print-target .rpt-footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #ddd; font-family: Arial, sans-serif; font-size: 9px; color: #aaa; text-align: center; }
+  }
   </style>
 </head>
 <body>
@@ -352,7 +379,7 @@
       <div style="margin:24px 0 0">
         <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px">
           <div id="dash-series-title" style="font-family:var(--serif);font-size:18px;font-weight:400">—</div>
-          <button class="btn btn-ghost btn-sm" onclick="alert('Send update — coming soon')">Send Update →</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadReport()">Download Report</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:24px">
           <div style="background:var(--bg);padding:16px 14px">
@@ -1187,6 +1214,79 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ─── DOWNLOAD REPORT ─────────────────────────────
+  function downloadReport() {
+    const p = state.projects[0] || {};
+    const title = p.title || '—';
+    const owner = p.rhName || state.user.name || '—';
+    const rhPct = p.rhPct || 70;
+    const rate = window._calcRate || 1;
+    const ratePct = Math.round(rate * 100);
+    const soldTickets = Math.round(2500 * rate);
+    const epGross = soldTickets * 3.50;
+    const seriesGross = epGross * 10;
+    const shopGross = 3 * 50 * (55 + 65 + 25) / 3;
+    const fmt = v => '$' + Math.round(v).toLocaleString();
+    const date = new Date().toLocaleDateString('en-NZ', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Build team list
+    const allMembers = [
+      ...(p.ktMembers || []).map(m => ({ ...m, pool: 'Key Team' })),
+      ...(p.crewMembers || []).map(m => ({ ...m, pool: 'Crew' }))
+    ];
+    const teamRows = allMembers.length > 0
+      ? allMembers.map(m => `
+          <div class="rpt-team-row">
+            <span>${m.name || '—'} <span style="color:#888;font-style:italic">${m.role || ''}</span></span>
+            <span>${m.pool} · ${m.pct}% · <span style="color:${m.status === 'accepted' ? '#2a7a2a' : '#888'}">${m.status}</span></span>
+          </div>`).join('')
+      : '<div style="font-size:12px;color:#888;padding:8px 0">No team members yet.</div>';
+
+    const html = `
+      <h1>${title}</h1>
+      <div class="rpt-sub">Owner: ${owner} &nbsp;·&nbsp; Generated ${date} &nbsp;·&nbsp; Scenario: ${ratePct}% sell-through</div>
+
+      <div class="rpt-section">
+        <div class="rpt-label">Revenue to Date</div>
+        <hr class="rpt-rule">
+        <div class="rpt-grid">
+          <div class="rpt-cell"><div class="rpt-cell-lbl">Revenue</div><div class="rpt-cell-val">$0</div><div class="rpt-cell-sub">net sales</div></div>
+          <div class="rpt-cell"><div class="rpt-cell-lbl">Your Cut</div><div class="rpt-cell-val rpt-accent">$0</div><div class="rpt-cell-sub">at ${rhPct}%</div></div>
+          <div class="rpt-cell"><div class="rpt-cell-lbl">Subscribers</div><div class="rpt-cell-val">0</div><div class="rpt-cell-sub">notify list</div></div>
+        </div>
+      </div>
+
+      <div class="rpt-section">
+        <div class="rpt-label">Revenue Potential — ${ratePct}% Sell-Through</div>
+        <hr class="rpt-rule">
+        <div class="rpt-row rpt-row-hdr"><span></span><span class="rpt-num">Episode</span><span class="rpt-num">Series</span><span class="rpt-num">Shop</span></div>
+        <div class="rpt-row"><span>${soldTickets.toLocaleString()} tickets × $3.50</span><span class="rpt-num">${fmt(epGross)}</span><span class="rpt-num">${fmt(seriesGross)}</span><span class="rpt-num">—</span></div>
+        <div class="rpt-row"><span>Your cut <span class="rpt-accent">${rhPct}%</span></span><span class="rpt-num rpt-accent">${fmt(epGross * rhPct / 100)}</span><span class="rpt-num rpt-accent">${fmt(seriesGross * rhPct / 100)}</span><span class="rpt-num">—</span></div>
+        <div class="rpt-row"><span>Shop (3 items × 50 units)</span><span class="rpt-num">—</span><span class="rpt-num">—</span><span class="rpt-num">${fmt(shopGross)}</span></div>
+        <div class="rpt-row"><span>Your cut <span class="rpt-accent">${rhPct}%</span></span><span class="rpt-num">—</span><span class="rpt-num">—</span><span class="rpt-num rpt-accent">${fmt(shopGross * rhPct / 100)}</span></div>
+        <div class="rpt-row" style="font-weight:600;border-bottom:none"><span>Your total</span><span class="rpt-num">${fmt(epGross * rhPct / 100)}</span><span class="rpt-num">${fmt(seriesGross * rhPct / 100)}</span><span class="rpt-num">${fmt(shopGross * rhPct / 100)}</span></div>
+      </div>
+
+      <div class="rpt-section">
+        <div class="rpt-label">Team</div>
+        <hr class="rpt-rule">
+        ${teamRows}
+      </div>
+
+      <div class="rpt-footer">Generated by PUNA · puna.nz · ${date}</div>`;
+
+    let target = document.getElementById('report-print-target');
+    if (!target) {
+      target = document.createElement('div');
+      target.id = 'report-print-target';
+      target.style.display = 'none';
+      document.body.appendChild(target);
+    }
+    target.innerHTML = html;
+    window.print();
+    setTimeout(() => { target.innerHTML = ''; }, 1000);
   }
 
   // ─── REVENUE POTENTIAL CALCULATOR ────────────────
