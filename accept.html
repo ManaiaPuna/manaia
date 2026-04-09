@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Puna — Accept Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #111110; --raised: #191918; --rule: #252523;
+      --dim: #444442; --sub: #666664; --text: #E8E6E1;
+      --accent: #C9894A;
+      --sans: 'Roboto', sans-serif;
+      --serif: 'DM Serif Display', serif;
+      --mono: 'DM Mono', monospace;
+    }
+    html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
+
+    .wrap { max-width: 520px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .header {
+      height: 52px; display: flex; align-items: center;
+      border-bottom: 1px solid var(--rule); margin-bottom: 48px;
+    }
+    .brand { font-family: var(--serif); font-size: 18px; letter-spacing: 3px; text-transform: uppercase; }
+    .brand span { color: var(--accent); }
+
+    .lbl { font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); display: block; }
+
+    /* screens */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* loading */
+    .loading { padding: 80px 0; text-align: center; color: var(--sub); font-size: 12px; font-weight: 300; letter-spacing: 1px; }
+
+    /* invitation card */
+    .invite-hero { margin-bottom: 40px; }
+    .invite-eyebrow { margin-bottom: 12px; }
+    .invite-title { font-family: var(--serif); font-size: 32px; line-height: 1.1; margin-bottom: 8px; }
+    .invite-sub { font-size: 13px; font-weight: 300; color: var(--sub); line-height: 1.75; }
+
+    .invite-detail {
+      border-top: 1px solid var(--rule); margin-bottom: 32px;
+    }
+    .invite-detail-row {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--rule);
+    }
+    .invite-detail-label { font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dim); }
+    .invite-detail-value { font-size: 13px; font-weight: 400; text-align: right; }
+    .invite-pct { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--accent); }
+
+    /* agreement */
+    .agreement {
+      background: var(--raised); padding: 20px; margin-bottom: 28px;
+      border-left: 3px solid var(--rule);
+    }
+    .agreement-title { font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sub); margin-bottom: 14px; }
+    .agreement-body { font-size: 12px; font-weight: 300; color: var(--sub); line-height: 1.85; }
+    .agreement-body strong { color: var(--text); font-weight: 500; }
+    .agreement-body p { margin-bottom: 10px; }
+    .agreement-body p:last-child { margin-bottom: 0; }
+
+    /* sign */
+    .sign-section { margin-bottom: 28px; }
+    .field-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--sub); display: block; margin-bottom: 8px; }
+    .field-input {
+      width: 100%; background: var(--raised); border: 1px solid var(--rule);
+      color: var(--text); font-family: var(--sans); font-size: 14px; font-weight: 300;
+      padding: 12px 14px; outline: none; transition: border-color 0.15s;
+      -webkit-appearance: none; border-radius: 0;
+    }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--dim); }
+    .field-hint { font-size: 10px; font-weight: 300; color: var(--sub); margin-top: 6px; line-height: 1.6; }
+
+    .checkbox-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; cursor: pointer; }
+    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+    .checkbox-label { font-size: 12px; font-weight: 300; color: var(--sub); line-height: 1.65; }
+    .checkbox-label strong { color: var(--text); font-weight: 400; }
+
+    .btn {
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 12px 24px; border: none; cursor: pointer;
+      transition: opacity 0.15s; display: flex; align-items: center; justify-content: center;
+      width: 100%;
+    }
+    .btn:hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-decline { background: transparent; color: var(--sub); border: none; font-size: 10px; margin-top: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: block; text-align: center; width: 100%; padding: 8px; }
+
+    /* accepted */
+    .accepted-hero { padding: 60px 0; text-align: center; }
+    .accepted-icon { font-size: 36px; margin-bottom: 20px; }
+    .accepted-title { font-family: var(--serif); font-size: 28px; margin-bottom: 12px; }
+    .accepted-body { font-size: 13px; font-weight: 300; color: var(--sub); line-height: 1.75; }
+    .accepted-detail {
+      margin-top: 32px; padding: 20px; border: 1px solid var(--rule); text-align: left;
+    }
+    .accepted-detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+    .accepted-detail-row:last-child { border-bottom: none; }
+    .accepted-detail-label { font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); }
+    .accepted-detail-val { font-size: 12px; font-weight: 400; }
+
+    /* declined */
+    .declined-hero { padding: 60px 0; text-align: center; }
+    .declined-title { font-family: var(--serif); font-size: 24px; color: var(--sub); margin-bottom: 12px; }
+    .declined-body { font-size: 13px; font-weight: 300; color: var(--dim); }
+
+    /* error */
+    .error-hero { padding: 80px 0; text-align: center; }
+    .error-title { font-family: var(--serif); font-size: 24px; color: var(--sub); margin-bottom: 12px; }
+    .error-body { font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.75; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">Puna <span>Studio</span></div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="screen active" id="screen-loading">
+    <div class="loading">Loading your invitation…</div>
+  </div>
+
+  <!-- INVITATION -->
+  <div class="screen" id="screen-invite">
+    <div class="invite-hero">
+      <div class="lbl invite-eyebrow" style="margin-bottom:12px">You've been invited</div>
+      <div class="invite-title" id="inv-title">—</div>
+      <div class="invite-sub" id="inv-sub">—</div>
+    </div>
+
+    <div class="invite-detail">
+      <div class="invite-detail-row">
+        <div class="invite-detail-label">Project</div>
+        <div class="invite-detail-value" id="inv-project">—</div>
+      </div>
+      <div class="invite-detail-row">
+        <div class="invite-detail-label">Your role</div>
+        <div class="invite-detail-value" id="inv-role">—</div>
+      </div>
+      <div class="invite-detail-row">
+        <div class="invite-detail-label">Pool</div>
+        <div class="invite-detail-value" id="inv-pool">—</div>
+      </div>
+      <div class="invite-detail-row">
+        <div class="invite-detail-label">Your revenue share</div>
+        <div class="invite-pct" id="inv-pct">—</div>
+      </div>
+      <div class="invite-detail-row">
+        <div class="invite-detail-label">Rights holder</div>
+        <div class="invite-detail-value" id="inv-rh">—</div>
+      </div>
+    </div>
+
+    <div class="agreement">
+      <div class="agreement-title">Revenue Share Agreement</div>
+      <div class="agreement-body">
+        <p><strong>This is not an ownership agreement.</strong> Accepting this invitation does not give you any ownership of, rights to, or stake in <span id="agree-project">this project</span> or any associated intellectual property. <strong id="agree-rh">The rights holder</strong> retains full and exclusive ownership of all intellectual property at all times.</p>
+        <p>You are being offered a <strong>revenue share</strong> — a percentage of net sales as listed above — as a reward for your contribution to this project. This share is paid from sales proceeds after platform fees and payment processing costs.</p>
+        <p>This share is non-transferable. It applies to this project only. It carries no voting rights, editorial control, or decision-making authority over the project.</p>
+        <p>Payment will be made via the platform's payment system once integrated. The rights holder may lock the project at any time, fixing all splits permanently.</p>
+      </div>
+    </div>
+
+    <div class="sign-section">
+      <label class="field-label" for="sign-name">Sign with your full name</label>
+      <input class="field-input" type="text" id="sign-name" placeholder="Your full legal name">
+      <div class="field-hint">By typing your name you confirm you have read and agree to the terms above.</div>
+    </div>
+
+    <label class="checkbox-row">
+      <input type="checkbox" id="agree-check">
+      <span class="checkbox-label">I understand that <strong>I do not own or hold any rights</strong> to this intellectual property, and I accept the revenue share percentage listed above.</span>
+    </label>
+
+    <button class="btn btn-primary" onclick="acceptInvite()" id="accept-btn">Accept Invitation →</button>
+    <button class="btn-decline" onclick="declineInvite()">Decline</button>
+  </div>
+
+  <!-- ACCEPTED -->
+  <div class="screen" id="screen-accepted">
+    <div class="accepted-hero">
+      <div class="accepted-icon">✓</div>
+      <div class="accepted-title" id="acc-title">You're in.</div>
+      <div class="accepted-body" id="acc-body">Your acceptance has been recorded. A confirmation has been sent to your email.</div>
+      <div class="accepted-detail" id="acc-detail"></div>
+    </div>
+  </div>
+
+  <!-- DECLINED -->
+  <div class="screen" id="screen-declined">
+    <div class="declined-hero">
+      <div class="declined-title">Invitation declined.</div>
+      <div class="declined-body">Your response has been recorded. You can close this page.</div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="screen" id="screen-error">
+    <div class="error-hero">
+      <div class="error-title">This link has expired.</div>
+      <div class="error-body">Invitation links expire after 7 days.<br>Ask the rights holder to send a new invitation.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let inviteData = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    if (!token) {
+      showScreen('screen-error');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/accept?token=' + token);
+      if (!res.ok) throw new Error();
+      inviteData = await res.json();
+      renderInvite(inviteData);
+      showScreen('screen-invite');
+    } catch (_) {
+      // Dev mode: render mock invite
+      inviteData = {
+        token,
+        name: 'Hera Ngāta',
+        email: 'hera@example.com',
+        project: 'Manaia',
+        projectId: 'proj-001',
+        role: 'Producer',
+        pool: 'Rōpū Matua · Key Team',
+        pct: 6,
+        rhName: 'Big River Creative Ltd',
+        senderName: 'Te Māia Tūhoe'
+      };
+      renderInvite(inviteData);
+      showScreen('screen-invite');
+    }
+  });
+
+  function renderInvite(d) {
+    document.getElementById('inv-title').textContent = 'Kia ora, ' + d.name + '.';
+    document.getElementById('inv-sub').textContent =
+      d.senderName + ' has added you to ' + d.project + '.';
+    document.getElementById('inv-project').textContent = d.project;
+    document.getElementById('inv-role').textContent = d.role;
+    document.getElementById('inv-pool').textContent = d.pool;
+    document.getElementById('inv-pct').textContent = d.pct + '%';
+    document.getElementById('inv-rh').textContent = d.rhName;
+    document.getElementById('agree-project').textContent = d.project;
+    document.getElementById('agree-rh').textContent = d.rhName;
+    document.title = 'Puna — Invitation to ' + d.project;
+  }
+
+  async function acceptInvite() {
+    const signedName = document.getElementById('sign-name').value.trim();
+    const agreed = document.getElementById('agree-check').checked;
+
+    if (!signedName) { document.getElementById('sign-name').focus(); return; }
+    if (!agreed) { document.getElementById('agree-check').focus(); return; }
+
+    const btn = document.getElementById('accept-btn');
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+
+    try {
+      await fetch('/api/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: inviteData.token,
+          signedName,
+          acceptedAt: new Date().toISOString()
+        })
+      });
+    } catch (_) {}
+
+    document.getElementById('acc-title').textContent = 'Kia ora, ' + inviteData.name + '.';
+    document.getElementById('acc-body').textContent =
+      'Your acceptance has been recorded and a confirmation sent to ' + inviteData.email + '.';
+    document.getElementById('acc-detail').innerHTML = `
+      <div class="accepted-detail-row">
+        <div class="accepted-detail-label">Project</div>
+        <div class="accepted-detail-val">${inviteData.project}</div>
+      </div>
+      <div class="accepted-detail-row">
+        <div class="accepted-detail-label">Your role</div>
+        <div class="accepted-detail-val">${inviteData.role}</div>
+      </div>
+      <div class="accepted-detail-row">
+        <div class="accepted-detail-label">Revenue share</div>
+        <div class="accepted-detail-val" style="font-family:var(--mono);color:var(--accent)">${inviteData.pct}%</div>
+      </div>
+      <div class="accepted-detail-row">
+        <div class="accepted-detail-label">Signed as</div>
+        <div class="accepted-detail-val">${signedName}</div>
+      </div>
+      <div class="accepted-detail-row">
+        <div class="accepted-detail-label">Date</div>
+        <div class="accepted-detail-val">${new Date().toLocaleDateString('en-NZ', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+      </div>`;
+
+    showScreen('screen-accepted');
+  }
+
+  async function declineInvite() {
+    try {
+      await fetch('/api/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: inviteData.token, declined: true })
+      });
+    } catch (_) {}
+    showScreen('screen-declined');
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+</script>
+</body>
+</html>

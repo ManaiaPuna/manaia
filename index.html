@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puna — Manaia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #111110;
+      --raised:  #191918;
+      --text:    #E8E4DC;
+      --sub:     #C2BDB6;
+      --dim:     #B0ABA4;
+      --rule:    #252523;
+      --accent:  #C9894A;
+      --warn:    #C4412A;
+      --green:   #5FAF74;
+      --sans:    'Inter', -apple-system, sans-serif;
+      --mono:    'IBM Plex Mono', 'Courier New', monospace;
+      --serif:   'DM Serif Display', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 13px;
+      line-height: 1.5; min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* film grain */
+    body::after {
+      content: ''; position: fixed; inset: 0; z-index: 900;
+      pointer-events: none; opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px;
+    }
+
+    /* ─── FOCUS ──────────────────────────────── */
+    :focus-visible { outline: 1px solid var(--sub); outline-offset: 3px; }
+    .btn:focus-visible { outline: 1px solid var(--text); outline-offset: 3px; }
+    input:focus-visible, textarea:focus-visible { outline: none; border-bottom-color: var(--sub) !important; }
+
+    /* ─── HEADER ─────────────────────────────── */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--bg); border-bottom: 1px solid var(--rule);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    /* offset content below fixed header — except Enjoy tab poster which bleeds to top */
+    #panel-series, #panel-episodes { padding-top: 44px; }
+    .header.transparent {
+      background: transparent;
+      border-bottom-color: transparent;
+    }
+    .header-inner {
+      max-width: 720px; margin: 0 auto; padding: 0 24px;
+      height: 44px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .wordmark { font-family: var(--serif); font-size: 15px; letter-spacing: 3px; text-transform: uppercase; }
+    .header-right { display: flex; align-items: center; gap: 4px; }
+    .tab-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--sub); padding: 6px 12px;
+      transition: color 0.15s;
+      position: relative;
+    }
+    .tab-btn::after {
+      content: ''; position: absolute; bottom: -1px; left: 12px; right: 12px;
+      height: 1px; background: transparent; transition: background 0.15s;
+    }
+    .tab-btn.active { color: var(--text); }
+    .tab-btn.active::after { background: var(--text); }
+    .tab-btn:hover { color: var(--text); }
+    .dot-live { width: 5px; height: 5px; border-radius: 50%; background: var(--warn); margin-left: 8px; flex-shrink: 0; }
+
+    /* ─── TABS ───────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── WRAP ───────────────────────────────── */
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+    /* ═══════════════════════════════════════════
+       TAB 1 — CURRENT EPISODE
+    ══════════════════════════════════════════ */
+
+    /* ─── POSTER ─────────────────────────────── */
+    .poster {
+      width: 100%;
+      height: 100svh;
+      position: relative; overflow: hidden;
+      background: #0C0B0A;
+    }
+    @media (min-width: 600px) {
+      .poster { height: auto; aspect-ratio: 2/3; max-height: 75vh; }
+    }
+
+    /* ambient video loop — Netflix/Spotify style hero */
+    .poster-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center top;
+      opacity: 0.65;
+    }
+
+    /* still image fallback */
+    .poster-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center top;
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .poster-img.loaded { opacity: 0.42; }
+
+    /* atmospheric layers — always on top of image */
+    .poster-bg {
+      position: absolute; inset: 0;
+      background: none;
+    }
+    .poster.has-image .poster-bg {
+      background:
+        radial-gradient(ellipse at 40% 20%, rgba(201,137,74,.06) 0%, transparent 40%),
+        linear-gradient(180deg, rgba(10,9,8,.6) 0%, rgba(10,9,8,.3) 40%, rgba(10,9,8,.95) 58%, #0C0B0A 68%);
+    }
+
+    /* abstract cityscape — Wellington waterfront suggestion */
+    .poster-city {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 45%;
+    }
+    .poster-city::before {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 100%;
+      background:
+        /* building silhouettes — just shapes of dark rectangles */
+        linear-gradient(to top, #0A0908 0%, transparent 100%);
+      clip-path: polygon(
+        0% 100%,
+        0% 55%, 4% 55%, 4% 30%, 7% 30%, 7% 55%,
+        10% 55%, 10% 20%, 13% 20%, 13% 40%, 15% 40%, 15% 15%,
+        18% 15%, 18% 45%, 22% 45%, 22% 25%, 25% 25%, 25% 55%,
+        28% 55%, 28% 35%, 30% 35%, 30% 10%, 33% 10%, 33% 35%,
+        36% 35%, 36% 50%, 40% 50%, 40% 30%, 43% 30%, 43% 20%,
+        46% 20%, 46% 45%, 50% 45%, 50% 60%, 54% 60%, 54% 35%,
+        57% 35%, 57% 18%, 60% 18%, 60% 42%, 63% 42%, 63% 28%,
+        66% 28%, 66% 50%, 70% 50%, 70% 38%, 73% 38%, 73% 22%,
+        76% 22%, 76% 46%, 80% 46%, 80% 30%, 83% 30%, 83% 55%,
+        86% 55%, 86% 40%, 90% 40%, 90% 25%, 93% 25%, 93% 48%,
+        96% 48%, 96% 55%, 100% 55%,
+        100% 100%
+      );
+    }
+    .poster-city::after {
+      content: '';
+      position: absolute; bottom: 25%; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,137,74,.08), rgba(201,137,74,.12), rgba(201,137,74,.06), transparent);
+    }
+
+    /* water reflection */
+    .poster-water {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 22%;
+      background: linear-gradient(180deg,
+        rgba(201,137,74,.04) 0%,
+        rgba(14,13,11,.8) 40%,
+        #0A0908 100%
+      );
+    }
+
+    /* subtle horizontal scan lines */
+    .poster-scan {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(transparent 98.5%, rgba(255,255,255,.012) 98.5%);
+      background-size: 100% 4px;
+    }
+
+    /* gradient overlay — Netflix-style: soft vignette top + strong bottom fade for text */
+    .poster-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(10,9,8,.4) 0%, transparent 30%),
+        linear-gradient(to top, #0C0B0A 0%, rgba(10,9,8,.88) 28%, rgba(10,9,8,.35) 50%, transparent 70%);
+    }
+
+    /* poster content */
+    .poster-content {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0 24px 32px;
+    }
+    @media (min-width: 600px) {
+      .poster-content { padding: 0 32px 36px; }
+    }
+    /* design system spacing rhythm — 8px base unit */
+    .poster-title {
+      font-family: var(--serif);
+      font-size: clamp(44px, 11vw, 80px);
+      line-height: 0.92; letter-spacing: -1.5px;
+      margin-bottom: 8px;
+    }
+    .poster-ep-title {
+      font-family: var(--serif); font-style: italic;
+      font-size: clamp(14px, 3vw, 17px);
+      line-height: 1.4; color: var(--text);
+      margin-bottom: 16px;
+    }
+    /* section label — matches design system: 9px / 500 / 2.5px tracking */
+    .poster-eyebrow {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 8px;
+    }
+    /* scarcity + CTA embedded in poster */
+    @keyframes bar-pulse {
+      0%, 100% { box-shadow: 0 0 4px 1px rgba(232,228,220,.25); opacity: 1; }
+      50%       { box-shadow: 0 0 10px 3px rgba(232,228,220,.5); opacity: 0.75; }
+    }
+    .poster-bar-track {
+      height: 3px; background: rgba(255,255,255,.1);
+      position: relative; margin-bottom: 24px;
+      border-radius: 2px;
+    }
+    .poster-bar-fill {
+      position: absolute; left: 0; top: 0; height: 100%;
+      background: rgba(232,228,220,.9);
+      border-radius: 2px;
+      box-shadow: 0 0 6px 2px rgba(232,228,220,.3);
+      animation: bar-pulse 2.8s ease-in-out infinite;
+    }
+    /* price tier tick marks on bar */
+    .bar-tick {
+      position: absolute; top: -3px;
+      width: 2px; height: 9px;
+      background: #C9894A;
+      border-radius: 1px;
+      transform: translateX(-50%);
+    }
+    .bar-tick-label {
+      position: absolute; top: 10px;
+      transform: translateX(-50%);
+      font-family: var(--mono); font-size: 8px; font-weight: 500;
+      color: #C9894A; letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .poster-scarcity-row {
+      display: flex; flex-direction: column; gap: 4px;
+      margin-bottom: 16px;
+    }
+    .poster-passes {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--text); letter-spacing: 0.5px;
+    }
+    .poster-passes b { color: var(--text); font-weight: 500; }
+    .poster-tier-msg {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      color: var(--accent); letter-spacing: 0.5px; margin-top: 4px;
+    }
+    /* "price rises" replaces confusing "early access" */
+    .poster-tier {
+      font-size: 9px; font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent);
+    }
+    .poster-actions {
+      display: flex; align-items: stretch; gap: 10px;
+      margin-bottom: 12px;
+    }
+    .poster-actions .btn-primary {
+      flex: 1; display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 20px; font-size: 10px; letter-spacing: 3px;
+    }
+    .btn-watch-price {
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      letter-spacing: 0; color: var(--bg); opacity: 0.75;
+    }
+    /* Koha button — same height as Watch Now, stacked label */
+    .poster-actions .btn-koha-poster {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.3);
+      color: rgba(232,228,220,.9);
+      font-family: var(--sans); cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; padding: 0 18px; min-width: 100px;
+    }
+    .poster-actions .btn-koha-poster:hover {
+      border-color: rgba(255,255,255,.6); color: var(--text);
+    }
+    .btn-koha-poster-main {
+      font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .btn-koha-poster-sub {
+      font-size: 8px; font-weight: 400; letter-spacing: 1.5px;
+      text-transform: uppercase; opacity: 0.55;
+    }
+    .poster-open-date {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--text); letter-spacing: 0.3px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cal-link {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--sub); text-decoration: none;
+      border-bottom: 1px solid rgba(232,228,220,.2);
+      white-space: nowrap; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; padding: 0;
+    }
+    .cal-link:hover { color: var(--text); border-color: rgba(232,228,220,.4); }
+    .cal-picker {
+      display: none; position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: #1C1C1A; border: 1px solid var(--rule);
+      padding: 6px 0; z-index: 10; min-width: 160px;
+    }
+    .cal-picker.open { display: block; }
+    .cal-picker a {
+      display: block; font-family: var(--mono); font-size: 10px; font-weight: 400;
+      letter-spacing: 0.5px; color: var(--text); text-decoration: none;
+      padding: 8px 14px; white-space: nowrap;
+    }
+    .cal-picker a:hover { background: rgba(255,255,255,.05); color: var(--text); }
+
+    /* ─── AOTEAROA BADGE ─────────────────────── */
+    .badge-aotearoa {
+      display: inline-block;
+      background: transparent; color: rgba(201,137,74,.7);
+      font-size: 8px; font-weight: 500; letter-spacing: 2.5px;
+      text-transform: uppercase; padding: 0;
+      margin-bottom: 20px; /* space before scarcity section */
+    }
+    .poster-corner {
+      position: absolute; top: 52px; right: 24px;
+      font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,.1);
+    }
+    .poster-trailer {
+      position: absolute; top: 20px; left: 24px;
+      background: rgba(17,17,16,.6); border: 1px solid rgba(255,255,255,.1);
+      color: var(--text); font-family: var(--mono);
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 7px 14px; cursor: pointer;
+      transition: opacity 0.15s; backdrop-filter: blur(4px);
+    }
+    .poster-trailer:hover { opacity: 0.7; }
+
+    /* ─── EPISODE PANEL ──────────────────────── */
+    .ep-panel { padding: 0; border-top: 1px solid var(--rule); }
+
+    /* inner tabs — tap to open full-screen sheet */
+    .inner-tabs {
+      display: flex; align-items: center;
+    }
+    .inner-tab {
+      flex: 1; text-align: center;
+      background: none; border: none; cursor: pointer;
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      white-space: nowrap;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--sub); padding: 6px 12px;
+      position: relative; transition: color 0.15s;
+    }
+    .inner-tab + .inner-tab::before {
+      content: '|'; position: absolute; left: 0;
+      color: var(--sub); font-size: 12px; font-weight: 400;
+    }
+    .inner-tab:hover { color: var(--text); }
+    .inner-tab .tab-arrow {
+      display: inline-block; margin-left: 6px;
+      font-size: 8px; opacity: 0.4; vertical-align: middle;
+    }
+
+    /* ─── FULL-SCREEN INFO SHEETS ─────────────── */
+    .info-sheet {
+      position: fixed; inset: 0; z-index: 200;
+      background: #111110;
+      transform: translateY(100%);
+      transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      display: flex; flex-direction: column;
+    }
+    .info-sheet.open { transform: translateY(0); }
+    .sheet-header {
+      position: sticky; top: 0; z-index: 1;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid var(--rule);
+      background: #111110;
+    }
+    .sheet-title {
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--text);
+    }
+    .sheet-close {
+      background: none; border: none; color: var(--sub);
+      font-size: 18px; cursor: pointer; padding: 4px 0 4px 16px;
+      line-height: 1; transition: color 0.15s;
+    }
+    .sheet-close:hover { color: var(--text); }
+    .sheet-body { padding: 28px 24px 100px; flex: 1; }
+
+    /* sheet about content */
+    .sheet-desc {
+      font-family: var(--serif); font-style: italic;
+      font-size: 17px; line-height: 1.75;
+      color: var(--text); margin-bottom: 28px;
+    }
+    .sheet-meta { border-top: 1px solid var(--rule); margin-bottom: 32px; }
+    .sheet-meta-row {
+      display: flex; align-items: baseline;
+      padding: 11px 0; border-bottom: 1px solid var(--rule);
+    }
+    .sheet-meta-label {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--dim); width: 96px; flex-shrink: 0;
+    }
+    .sheet-meta-val {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text); letter-spacing: 0.3px; line-height: 1.55;
+    }
+    .sheet-section-label {
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--dim); margin-bottom: 16px;
+    }
+    .sheet-ep-list { margin-bottom: 36px; }
+    .sheet-ep-row {
+      display: flex; align-items: baseline; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--rule);
+    }
+    .sheet-ep-num {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 1px; color: var(--dim); width: 28px; flex-shrink: 0;
+    }
+    .sheet-ep-title {
+      font-family: var(--sans); font-size: 13px; font-weight: 400;
+      color: rgba(232,228,220,.8); flex: 1; line-height: 1.4;
+    }
+    .sheet-ep-status {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+    }
+    .sheet-ep-status.available { color: var(--accent); }
+    .sheet-ep-status.coming { color: var(--dim); }
+    .sheet-ep-status.free { color: var(--green); }
+    .sheet-creator-note {
+      font-family: var(--serif); font-style: italic;
+      font-size: 14px; line-height: 1.75;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .sheet-creator-attr {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--dim); letter-spacing: 0.5px;
+    }
+
+    /* about */
+    .about-desc {
+      font-family: var(--serif); font-style: italic;
+      font-size: 16px; line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+    .about-meta { margin-bottom: 32px; border-top: 1px solid var(--rule); }
+    .about-meta-row {
+      display: flex; align-items: baseline;
+      padding: 10px 0; border-bottom: 1px solid var(--rule);
+    }
+    .about-meta-label {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--dim); width: 88px; flex-shrink: 0;
+    }
+    .about-meta-val {
+      font-family: var(--mono); font-size: 11px; font-weight: 400;
+      color: var(--text); letter-spacing: 0.3px;
+    }
+    .share-section {}
+    .share-label {
+      font-size: 9px; font-weight: 500; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--sub);
+      margin-bottom: 14px;
+    }
+    .share-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .share-btn {
+      background: none; border: 1px solid var(--rule);
+      color: var(--sub); font-family: var(--sans);
+      font-size: 9px; font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 8px 16px;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .share-btn:hover { border-color: var(--sub); color: var(--text); }
+    .share-btn.copied { color: var(--green); border-color: var(--green); }
+
+    /* crew */
+    .crew-group { padding: 20px 0; border-bottom: 1px solid var(--rule); }
+    .crew-group:first-child { padding-top: 0; }
+    .crew-group:last-child { border-bottom: none; }
+    .crew-group-label {
+      font-size: 9px; font-weight: 500; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .crew-row {
+      display: flex; gap: 16px; padding: 5px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .crew-row:last-child { border-bottom: none; }
+    .crew-role {
+      font-family: var(--mono); font-size: 9px; color: var(--sub);
+      letter-spacing: 0.5px; width: 150px; flex-shrink: 0; padding-top: 2px;
+    }
+    .crew-name { font-family: var(--mono); font-size: 9px; font-weight: 400; }
+    .crew-name small { display: block; font-size: 10px; font-weight: 300; color: var(--sub); margin-top: 2px; }
+
+    .ep-panel-top {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 16px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .ep-panel-meta {}
+    .ep-panel-num {
+      font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--dim); margin-bottom: 4px;
+    }
+    .ep-panel-title { font-family: var(--serif); font-size: 22px; line-height: 1.2; }
+
+    .ep-panel-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    /* scarcity */
+    .scarcity { margin-bottom: 20px; }
+    .bar-track { height: 1px; background: var(--rule); position: relative; margin-bottom: 9px; }
+    .bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--text); }
+    .bar-fill.t2 { background: #B8864A; }
+    .bar-fill.t3 { background: #9A5230; }
+    .bar-fill.t4 { background: var(--warn); }
+    .scarcity-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .passes-text { font-family: var(--mono); font-size: 10px; color: var(--sub); }
+    .passes-text b { font-weight: 500; color: var(--text); }
+    .passes-text.t3 b { color: #B8864A; }
+    .passes-text.t4 b { color: var(--accent); }
+    .tier-name { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+
+    .ep-panel-foot {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    /* ─── STICKY WATCH BAR — mobile ─────────── */
+    .watch-bar {
+      display: none;
+    }
+    @media (max-width: 599px) {
+      .watch-bar {
+        display: block;
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+        background: linear-gradient(to top, var(--bg) 60%, transparent);
+        padding: 24px 20px 28px;
+        pointer-events: none;
+      }
+      .watch-bar-inner {
+        pointer-events: all;
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .watch-bar .btn-primary {
+        width: 100%; text-align: center;
+        padding: 14px 20px; font-size: 10px; letter-spacing: 3px;
+      }
+      .watch-bar-meta {
+        display: flex; justify-content: space-between; align-items: baseline;
+        padding: 0 2px;
+      }
+      .watch-bar-price { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+      .watch-bar-passes { font-family: var(--mono); font-size: 10px; color: var(--sub); }
+      .watch-bar-koha {
+        width: 100%; text-align: center;
+        background: none; border: 1px solid var(--rule);
+        font-family: var(--sans); font-size: 10px; font-weight: 500;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: var(--sub); cursor: pointer;
+        padding: 14px 20px; transition: color 0.15s, border-color 0.15s;
+      }
+      .watch-bar-koha:hover { color: var(--text); border-color: var(--sub); }
+      .ep-panel-actions { display: none; }
+    }
+    .price-block {}
+    .price { display: flex; align-items: baseline; gap: 5px; margin-bottom: 6px; }
+    .price-amount { font-family: var(--mono); font-size: 28px; font-weight: 500; letter-spacing: -1.5px; line-height: 1; }
+    .price-min { font-size: 9px; font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sub); }
+    .open-date { font-family: var(--mono); font-size: 10px; color: var(--sub); }
+    .open-badge { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+
+    /* ─── BUTTONS ────────────────────────────── */
+    .btn {
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 9px 20px; border: none; cursor: pointer;
+      transition: opacity 0.15s; white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.75; }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--rule); color: var(--sub);
+    }
+    .btn-ghost:hover { opacity: 1; border-color: var(--sub); color: var(--text); }
+    .btn-disabled {
+      background: transparent; border: 1px solid var(--rule);
+      color: var(--dim); cursor: default;
+    }
+    .btn-disabled:hover { opacity: 1; }
+    .btn-koha-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .btn-koha-en { font-size: 7px; opacity: 0.55; letter-spacing: 0.5px; }
+
+    /* ─── KOHA FORM ──────────────────────────── */
+    .koha-wrap {
+      display: none; margin-top: 20px; padding: 20px;
+      background: var(--raised); border-top: 1px solid var(--rule);
+    }
+    .koha-wrap.open { display: block; }
+    .koha-title {
+      font-size: 9px; font-weight: 500; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--sub); margin-bottom: 18px;
+    }
+    .koha-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+    .koha-fields .field-full { grid-column: 1 / -1; }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 9px; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--dim); margin-bottom: 7px;
+    }
+    .field input, .field textarea {
+      width: 100%; background: transparent; border: none;
+      border-bottom: 1px solid var(--rule);
+      color: var(--text); font-family: var(--sans);
+      font-size: 13px; font-weight: 300;
+      padding: 6px 0; outline: none; resize: none;
+    }
+    .field input::placeholder, .field textarea::placeholder { color: var(--dim); }
+    .field input:focus, .field textarea:focus { border-bottom-color: var(--sub); }
+    .anon-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .anon-row input[type=checkbox] { accent-color: var(--text); width: 12px; height: 12px; cursor: pointer; flex-shrink: 0; }
+    .anon-row label { font-size: 11px; color: var(--sub); cursor: pointer; line-height: 1.5; }
+    .koha-foot {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-top: 4px;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .koha-price { display: flex; align-items: baseline; gap: 5px; }
+    .koha-price-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sub); }
+    .koha-amount-wrap { display: flex; align-items: baseline; gap: 3px; }
+    .koha-currency { font-family: var(--mono); font-size: 13px; color: var(--sub); }
+    .koha-amount {
+      font-family: var(--mono); font-size: 18px; font-weight: 500;
+      background: transparent; border: none; border-bottom: 1px solid var(--rule);
+      color: var(--text); width: 52px; padding: 2px 0; outline: none;
+      -moz-appearance: textfield;
+    }
+    .koha-amount::-webkit-outer-spin-button,
+    .koha-amount::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .koha-amount:focus { border-bottom-color: var(--sub); }
+
+    /* ═══════════════════════════════════════════
+       TAB 2 — SERIES
+    ══════════════════════════════════════════ */
+    .series-tab { padding-bottom: 64px; }
+
+    /* series cinematic hero */
+    .series-visual {
+      position: relative; width: 100%;
+      height: clamp(480px, 75svh, 700px);
+      overflow: hidden; background: #0C0B0A;
+    }
+    .series-visual-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center center;
+      opacity: 0.55;
+    }
+    .series-visual-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(10,9,8,.3) 0%, transparent 25%),
+        linear-gradient(to top, #0C0B0A 0%, rgba(10,9,8,.85) 35%, rgba(10,9,8,.2) 60%, transparent 80%);
+    }
+    .series-hero {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0 24px 24px;
+    }
+    .series-eyebrow {
+      font-family: var(--mono); font-size: 9px; font-weight: 500;
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+    }
+    .series-title {
+      font-family: var(--serif);
+      font-size: clamp(44px, 11vw, 80px);
+      line-height: 0.92; letter-spacing: -1.5px; margin-bottom: 16px;
+    }
+    .series-logline {
+      font-family: var(--serif); font-style: italic;
+      font-size: clamp(14px, 3vw, 17px); line-height: 1.65; color: var(--text);
+      max-width: 500px; margin-bottom: 0;
+    }
+    .synopsis-toggle { padding: 14px 0; border-bottom: 1px solid var(--rule); border-top: 1px solid var(--rule); cursor: pointer; margin-bottom: 0; }
+    .synopsis-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .synopsis-header .section-label { color: var(--text); }
+    .synopsis-arrow { font-size: 11px; color: var(--text); transition: transform 0.2s; }
+    .synopsis-toggle.open .synopsis-arrow { transform: rotate(180deg); }
+    .series-synopsis {
+      font-family: var(--sans); font-size: 13px; font-weight: 300;
+      line-height: 1.65; color: var(--text);
+      max-width: 500px; margin-top: 12px; margin-bottom: 0;
+      display: none;
+    }
+    .synopsis-toggle.open .series-synopsis { display: block; }
+    .series-meta { display: grid; grid-template-columns: repeat(3,1fr); }
+    .meta-cell { padding: 14px 0; border-right: 1px solid var(--rule); }
+    .meta-cell:last-child { border-right: none; }
+    .meta-cell:not(:first-child) { padding-left: 20px; }
+    .meta-label { font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--sub); margin-bottom: 5px; }
+    .meta-value { font-family: var(--sans); font-size: 11px; font-weight: 400; }
+
+    /* section header */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 0 18px; border-bottom: 1px solid var(--rule);
+    }
+    .section-label { font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--sub); }
+
+    /* episodes tab video header */
+    .ep-hero {
+      position: relative; width: 100%;
+      height: clamp(240px, 40svh, 320px);
+      overflow: hidden; background: #0C0B0A;
+    }
+    .ep-hero-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center center;
+      opacity: 0.55;
+    }
+    .ep-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, #111110 0%, rgba(10,9,8,.5) 45%, transparent 80%);
+    }
+    .ep-hero-content {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0 24px 24px;
+    }
+
+    /* episode list */
+    .episode { padding: 20px; margin-bottom: 4px; background: #1C1A17; }
+    .ep-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+    .ep-num { font-family: var(--mono); font-size: 9px; color: var(--dim); flex-shrink: 0; padding-top: 2px; letter-spacing: 1px; }
+    .ep-title { font-family: var(--serif); font-size: 15px; line-height: 1.2; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ep-dur { font-family: var(--mono); font-size: 10px; color: var(--sub); flex-shrink: 0; }
+    .episode.locked { background: #161310; border-left: 2px solid rgba(199,119,55,.35); }
+    .episode.locked .ep-title { color: rgba(232,228,220,.6); }
+    .episode.locked .ep-num { color: var(--accent); opacity: 1; }
+    .episode.locked .ep-dur { color: var(--dim); }
+    .drops-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
+    .drops-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); opacity: 0.7; }
+    .countdown { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--accent); letter-spacing: 2px; }
+    .ep-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .ep-actions { display: flex; align-items: center; gap: 8px; }
+    .ep-price { display: flex; align-items: baseline; gap: 4px; }
+    .ep-price-amount { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+    .ep-price-min { font-size: 9px; color: var(--sub); letter-spacing: 1px; text-transform: uppercase; }
+    .ep-open-date { font-family: var(--mono); font-size: 9px; color: var(--dim); margin-top: 4px; }
+
+    /* promo */
+    .promo {
+      padding: 12px 16px; background: var(--raised);
+      border-left: 1px solid var(--accent);
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .promo-mark { font-family: var(--mono); font-size: 10px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+    .promo-text { font-size: 11px; color: var(--sub); line-height: 1.6; }
+
+    /* ─── SERIES PASS ─────────────────────────── */
+    .episodes-container {
+      border: 1px solid var(--rule);
+      margin-bottom: 32px;
+    }
+    .series-pass-block {
+      background: #1E160A;
+      border-bottom: 1px solid rgba(199,119,55,.25);
+      padding: 20px; margin-bottom: 0;
+    }
+    .meta-cell-link { background: none; border: none; padding: 0; text-align: left; cursor: pointer; width: 100%; }
+    .creator-video-block { padding: 20px 0 8px; border-top: 1px solid var(--rule); }
+    .socials-block { padding: 20px 0 28px; border-top: 1px solid var(--rule); }
+    .social-cards { display: flex; gap: 12px; margin-top: 16px; }
+    .social-card {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 10px; padding: 16px 8px;
+      background: var(--raised); border-radius: 2px;
+    }
+    .social-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--serif); font-size: 20px; color: rgba(255,255,255,.9);
+      flex-shrink: 0; overflow: hidden;
+    }
+    .social-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .social-name { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--text); letter-spacing: 0.3px; }
+    .social-btns { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .social-link {
+      display: block; text-align: center;
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 6px 8px; border-radius: 1px;
+      text-decoration: none; transition: opacity 0.15s;
+    }
+    .social-link:hover { opacity: 0.8; }
+    .social-link-ig { background: var(--accent); color: var(--bg); }
+    .social-link-tt { background: var(--raised); color: var(--accent); border: 1px solid var(--accent); }
+    .social-link svg { display: inline-block; vertical-align: middle; margin-right: 5px; margin-top: -1px; flex-shrink: 0; }
+    @keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .live-dot { animation: live-pulse 2.2s ease-in-out infinite; }
+    .creator-video-meta:not(:has(.creator-video-name:not(:empty))) { display: none; }
+    .creator-video-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .creator-video {
+      width: 100%; aspect-ratio: 16/9;
+      background: #0C0B0A; display: block;
+    }
+    .creator-video-name { font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--text); }
+    .creator-video-role { font-family: var(--sans); font-size: 11px; font-weight: 300; color: var(--sub); margin-top: 2px; }
+
+    /* thumbnail play state */
+    .creator-thumb {
+      position: relative; width: 100%; aspect-ratio: 1/1;
+      background: #0C0B0A; cursor: pointer; overflow: hidden;
+    }
+    .creator-thumb img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center top;
+      display: block; transition: opacity 0.2s;
+    }
+    .creator-thumb:hover img { opacity: 0.85; }
+    .creator-thumb-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,9,8,.7) 0%, transparent 50%);
+    }
+    .creator-play-btn {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); backdrop-filter: blur(6px);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .creator-thumb:hover .creator-play-btn {
+      background: rgba(255,255,255,0.25);
+      transform: translate(-50%,-50%) scale(1.07);
+    }
+    .creator-play-btn svg { margin-left: 3px; }
+    .creator-thumb.playing { display: none; }
+
+    .series-pass-eyebrow {
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 10px;
+    }
+    .series-pass-headline {
+      font-family: var(--serif); font-size: 18px; line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .series-pass-benefits {
+      list-style: none; padding: 0; margin: 0 0 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .series-pass-benefits li {
+      font-size: 12px; font-weight: 300; line-height: 1.5;
+      color: var(--text); padding-left: 14px; position: relative;
+    }
+    .series-pass-benefits li::before {
+      content: '·'; position: absolute; left: 0;
+      color: var(--accent); font-size: 14px;
+    }
+    .series-pass-pricing {
+      display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px;
+    }
+    .series-pass-price {
+      font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text);
+    }
+    .series-pass-compare {
+      font-family: var(--mono); font-size: 10px; color: var(--dim);
+      letter-spacing: 0.3px;
+    }
+    /* pre-purchase on locked episodes */
+    .locked-actions {
+      display: flex; align-items: center; gap: 16px;
+      margin-top: 10px; flex-wrap: nowrap;
+    }
+    /* series koha */
+    .series-koha-block { padding: 28px 0; border-bottom: 1px solid var(--rule); }
+    .series-koha-title { font-family: var(--serif); font-size: 20px; margin-bottom: 4px; }
+    .series-koha-sub { font-size: 11px; color: var(--sub); margin-bottom: 20px; }
+
+    /* pricing */
+    .pricing { padding: 0; border-bottom: 1px solid var(--rule); }
+    .pricing-row {
+      display: flex; align-items: center; gap: 20px;
+      padding: 12px 0; border-bottom: 1px solid var(--rule);
+    }
+    .pricing-range { font-family: var(--mono); font-size: 10px; color: var(--sub); width: 120px; flex-shrink: 0; }
+    .pricing-bar { flex: 1; height: 1px; background: var(--rule); position: relative; }
+    .pricing-bar-fill { position: absolute; left: 0; top: 0; height: 100%; }
+    .pricing-price { font-family: var(--mono); font-size: 11px; font-weight: 500; width: 70px; text-align: right; flex-shrink: 0; }
+    .pricing-note { padding: 18px 0 28px; font-size: 11px; font-weight: 300; color: var(--sub); line-height: 1.85; max-width: 480px; }
+
+    /* notify */
+    .notify-strip {
+      padding: 28px 0; border-bottom: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; flex-wrap: wrap;
+    }
+    .notify-title { font-family: var(--serif); font-size: 18px; margin-bottom: 4px; }
+    .notify-sub { font-size: 11px; color: var(--sub); }
+    .notify-form { display: flex; flex-shrink: 0; }
+    .notify-input {
+      background: transparent; border: 1px solid var(--rule); border-right: none;
+      color: var(--text); font-family: var(--sans); font-size: 12px; font-weight: 300;
+      padding: 8px 14px; outline: none; width: 190px;
+    }
+    .notify-input::placeholder { color: var(--dim); }
+    .notify-input:focus { border-color: var(--sub); }
+    .notify-submit {
+      background: var(--text); color: var(--bg);
+      font-family: var(--sans); font-size: 9px; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 16px; border: none; cursor: pointer;
+      transition: opacity 0.15s; flex-shrink: 0;
+    }
+    .notify-submit:hover { opacity: 0.75; }
+
+    /* about */
+    .about { padding: 36px 0; border-bottom: 1px solid var(--rule); }
+    .about-grid { display: grid; grid-template-columns: 120px 1fr; gap: 28px; align-items: start; margin-top: 20px; }
+    .about-portrait {
+      aspect-ratio: 3/4; background: var(--raised);
+      position: relative; overflow: hidden;
+    }
+    .about-portrait::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(160deg, transparent 40%, rgba(17,17,16,.5) 100%);
+    }
+    .about-portrait-inner {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .about-portrait-inner span { font-family: var(--serif); font-size: 32px; color: var(--rule); }
+    .about-name { font-family: var(--serif); font-size: 22px; margin-bottom: 4px; }
+    .about-role { font-size: 11px; color: var(--sub); margin-bottom: 16px; }
+    .about-bio { font-size: 13px; font-weight: 300; color: var(--text); line-height: 1.75; }
+
+    /* credits */
+    .credits { padding: 36px 0; border-bottom: 1px solid var(--rule); }
+    .credits-grid { margin-top: 20px; }
+    .credits-group { padding: 16px 0; border-bottom: 1px solid var(--rule); }
+    .credits-group:last-child { border-bottom: none; }
+    .credits-group-label {
+      font-size: 9px; font-weight: 500; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+    }
+    .credit-row {
+      display: flex; gap: 16px; padding: 5px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .credit-row:last-child { border-bottom: none; }
+    .credit-role {
+      font-family: var(--mono); font-size: 9px; color: var(--dim);
+      letter-spacing: 0.5px; width: 160px; flex-shrink: 0; padding-top: 2px;
+    }
+    .credit-name { font-size: 13px; font-weight: 400; line-height: 1.3; }
+    .credit-name small { display: block; font-size: 10px; font-weight: 300; color: var(--sub); margin-top: 2px; }
+
+    /* footer */
+    .footer { border-top: 1px solid var(--rule); }
+    .footer-inner {
+      max-width: 720px; margin: 0 auto; padding: 0 24px;
+      height: 44px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-brand { font-family: var(--serif); font-size: 15px; letter-spacing: 3px; text-transform: uppercase; color: var(--sub); }
+    .footer-credit { font-size: 10px; letter-spacing: 0.5px; color: var(--dim); }
+
+    /* ─── TRAILER MODAL ──────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(8,8,7,.94);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-inner { width: min(92vw, 640px); background: var(--raised); border: 1px solid var(--rule); }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--rule);
+    }
+    .modal-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--sub); }
+    .modal-close {
+      background: none; border: none; color: var(--sub);
+      font-family: var(--mono); font-size: 14px; cursor: pointer;
+      padding: 0; line-height: 1; transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-video {
+      aspect-ratio: 16/9; background: #000; position: relative;
+    }
+    .modal-video video { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .modal-placeholder { text-align: center; }
+    .modal-placeholder span { font-size: 28px; opacity: 0.15; }
+    .modal-placeholder p { font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--sub); margin-top: 10px; }
+
+    /* ─── SHOP SHEET ────────────────────────── */
+    .shop-item { padding: 20px 0; border-bottom: 1px solid var(--rule); }
+    .shop-item-img {
+      width: 100%; aspect-ratio: 3/2; background: var(--raised);
+      margin-bottom: 14px; overflow: hidden; position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .shop-item-img img { width: 100%; height: 100%; object-fit: contain; }
+    .shop-item-img-placeholder {
+      font-family: var(--serif); font-size: 11px; font-style: italic;
+      color: var(--dim); letter-spacing: 0.5px;
+    }
+    .shop-item-top { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .shop-item-title { font-family: var(--serif); font-size: 16px; color: var(--text); line-height: 1.2; }
+    .shop-item-desc { font-size: 12px; font-weight: 300; color: var(--sub); line-height: 1.65; margin-bottom: 10px; }
+    .shop-item-price { font-family: var(--mono); font-size: 16px; color: var(--text); flex-shrink: 0; }
+    .shop-item-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .shop-badge { font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); }
+    .shop-stock { font-family: var(--mono); font-size: 9px; color: var(--dim); }
+    .shop-btn { font-size: 10px; padding: 9px 20px; }
+
+    /* notify inline */
+    .notify-inline { display: none; margin-top: 10px; }
+    .notify-inline.open { display: flex; flex-direction: column; gap: 6px; }
+    .notify-inline-row { display: flex; align-items: center; }
+    .notify-inline-input {
+      flex: 1; background: transparent; border: none;
+      border-bottom: 1px solid var(--rule);
+      color: var(--text); font-family: var(--mono); font-size: 11px;
+      padding: 5px 0; outline: none;
+    }
+    .notify-inline-input::placeholder { color: var(--dim); }
+    .notify-inline-submit {
+      background: none; border: none; border-bottom: 1px solid var(--rule);
+      color: var(--sub); font-family: var(--mono); font-size: 9px;
+      font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+      padding: 5px 0 5px 12px; cursor: pointer; white-space: nowrap;
+      transition: color 0.15s; flex-shrink: 0;
+    }
+    .notify-inline-submit:hover { color: var(--text); }
+
+    /* poster ambient pulse while loading */
+    @keyframes ambient-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+    .poster-city::after { animation: ambient-pulse 3.5s ease-in-out infinite; }
+
+    /* sr-only */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 520px) {
+      .poster-content { padding: 24px 20px 28px; }
+      .poster-title { font-size: clamp(38px, 12vw, 60px); }
+      .series-meta { grid-template-columns: repeat(3,1fr); }
+      .ep-foot { flex-direction: column; align-items: flex-start; }
+      .koha-fields { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; }
+      .notify-strip { flex-direction: column; align-items: flex-start; }
+      .notify-input { width: 100%; }
+      .notify-form { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="wordmark">Puna</div>
+    <div class="header-right">
+      <button class="tab-btn active" onclick="switchTab('now')" id="tab-now" aria-selected="true">Enjoy</button>
+      <button class="tab-btn" onclick="switchTab('series')" id="tab-series" aria-selected="false">Series</button>
+      <button class="tab-btn" onclick="switchTab('episodes')" id="tab-episodes" aria-selected="false">Episodes</button>
+      <div class="dot-live" aria-hidden="true"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ TAB 1 — NOW ═══════════════════════════════════════ -->
+<div class="tab-panel active" id="panel-now">
+
+  <!-- POSTER — add Cloudflare Stream src here when footage is ready -->
+  <div class="poster" role="img" aria-label="Manaia — key art" id="poster">
+    <video class="poster-video" id="poster-video"
+      autoplay muted loop playsinline webkit-playsinline preload="auto"
+      aria-hidden="true">
+      <source src="/placeholder.mp4" type="video/mp4">
+    </video>
+    <img class="poster-img" id="poster-img" src="" alt="" aria-hidden="true">
+    <div class="poster-bg"></div>
+    <div class="poster-city"></div>
+    <div class="poster-water"></div>
+    <div class="poster-scan" aria-hidden="true"></div>
+    <div class="poster-overlay"></div>
+    <div class="poster-corner" aria-hidden="true">EP.01 — NOW</div>
+    <div class="poster-content" id="poster-content">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <div id="now-ep-panel" style="display:none"></div>
+
+
+
+</div>
+
+<!-- ═══ TAB 2 — SERIES ════════════════════════════════════ -->
+<div class="tab-panel" id="panel-series">
+
+  <!-- CINEMATIC HERO -->
+  <div class="series-visual">
+    <video class="series-visual-video" id="series-video"
+      autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="/series.mp4" type="video/mp4">
+    </video>
+    <div class="series-visual-overlay"></div>
+    <div class="series-hero">
+      <div class="series-eyebrow">Series 1 — 2026</div>
+      <h1 class="series-title">Manaia</h1>
+      <p class="series-logline">When a young Māori man vanishes from Wellington's waterfront, detective Manaia Parata is the only one who thinks it matters.</p>
+    </div>
+  </div>
+
+  <div class="wrap series-tab" style="background:#1A1714">
+    <div>
+      <div class="series-meta" role="list" style="margin-bottom:0">
+        <div class="meta-cell" role="listitem">
+          <div class="meta-label">Genre</div>
+          <div class="meta-value">Crime / Drama</div>
+        </div>
+        <div class="meta-cell" role="listitem" style="text-align:center">
+          <button class="meta-cell-link" onclick="switchTab('episodes')" aria-label="Go to episodes" style="text-align:center">
+            <div class="meta-label">Episodes</div>
+            <div class="meta-value" style="color:var(--text);text-decoration:underline;text-underline-offset:3px;cursor:pointer;">10 →</div>
+          </button>
+        </div>
+        <div class="meta-cell" role="listitem">
+          <div class="meta-label">Duration</div>
+          <div class="meta-value">2:30 each</div>
+        </div>
+      </div>
+      <div class="synopsis-toggle" onclick="this.classList.toggle('open');this.setAttribute('aria-expanded',this.classList.contains('open'))" role="button" aria-expanded="false">
+        <div class="synopsis-header">
+          <span class="section-label">Pūrākau | Story</span>
+          <span class="synopsis-arrow">↓</span>
+        </div>
+        <p class="series-synopsis">Ten two-minute episodes dropping fortnightly. A detective. A missing man. A city that doesn't care.</p>
+      </div>
+
+      <!-- KAI TITO | CREATORS -->
+      <div class="synopsis-toggle" onclick="this.classList.toggle('open');this.setAttribute('aria-expanded',this.classList.contains('open'))" role="button" aria-expanded="false">
+        <div class="synopsis-header">
+          <span class="section-label">Kai Tito | Creators</span>
+          <span class="synopsis-arrow">↓</span>
+        </div>
+        <div class="series-synopsis" style="padding-bottom:4px">
+          <div class="crew-row" style="padding:6px 0;border-bottom:1px solid var(--rule)"><div class="crew-role">Writer / Director</div><div class="crew-name">Te Māia Tūhoe</div></div>
+          <div class="crew-row" style="padding:6px 0;border-bottom:1px solid var(--rule)"><div class="crew-role">Producer</div><div class="crew-name">Hera Ngāta</div></div>
+          <div class="crew-row" style="padding:6px 0;border-bottom:1px solid var(--rule)"><div class="crew-role">Executive Producer</div><div class="crew-name">Rangi Pārata</div></div>
+          <div class="crew-row" style="padding:6px 0;border-bottom:1px solid var(--rule)"><div class="crew-role">Director of Photography</div><div class="crew-name">Luca Ferreira</div></div>
+          <div class="crew-row" style="padding:6px 0"><div class="crew-role">Original Score</div><div class="crew-name">Tāne Māhuta Collective</div></div>
+        </div>
+      </div>
+
+      <!-- CREATOR VIDEO -->
+      <div class="creator-video-block">
+        <div class="synopsis-header" style="margin-bottom:12px">
+          <span class="section-label" style="color:var(--text)">Kōrero | Message</span>
+        </div>
+        <div class="creator-video-wrap">
+          <!-- thumbnail — click to play -->
+          <div class="creator-thumb" id="creator-thumb" onclick="playCreatorVideo()">
+            <img src="/creator.png" alt="Message from the creator">
+            <div class="creator-thumb-overlay"></div>
+            <div class="creator-play-btn">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M6 3.5L14.5 9 6 14.5V3.5Z" fill="white"/>
+              </svg>
+            </div>
+          </div>
+          <video class="creator-video" id="creator-video" controls preload="none"
+            style="display:none"
+            aria-label="Message from the creator">
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4">
+          </video>
+          <div class="creator-video-meta" style="display:none">
+            <div class="creator-video-name"></div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- SERIES CTA -->
+      <div style="padding:28px 0 8px;border-top:1px solid var(--rule)">
+        <button class="btn btn-primary" onclick="watchEpisode('01')" style="width:100%;text-align:center;justify-content:center;margin-bottom:12px">Enjoy EP.01 — Free</button>
+        <button class="btn btn-primary" onclick="switchTab('episodes')" style="width:100%;text-align:center;justify-content:center">Get Series Pass →</button>
+      </div>
+
+    </div><!-- /padding-top -->
+  </div><!-- /wrap -->
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div class="footer-brand">Puna</div>
+        <a href="https://www.bigrivercreative.org" target="_blank" rel="noopener" style="font-size:9px;font-weight:400;color:var(--dim);letter-spacing:0.5px;text-decoration:none;opacity:0.5;">Made with aroha by Big River Creative</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-family:var(--serif);font-size:15px;font-weight:400;color:var(--sub);letter-spacing:-0.3px;">Manaia</span>
+        <span style="width:1px;height:12px;background:var(--rule);display:inline-block;"></span>
+        <a href="https://instagram.com/manaia.nz" target="_blank" rel="noopener" aria-label="Instagram" style="color:var(--sub);opacity:0.6;transition:opacity 0.15s;display:flex;align-items:center;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://tiktok.com/@manaia.nz" target="_blank" rel="noopener" aria-label="TikTok" style="color:var(--sub);opacity:0.6;transition:opacity 0.15s;display:flex;align-items:center;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">
+          <svg width="14" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.74a4.85 4.85 0 0 1-1.01-.05z"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══ TAB 3 — EPISODES ═══════════════════════════════════ -->
+<div class="tab-panel" id="panel-episodes">
+  <div class="ep-hero">
+    <video class="ep-hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true">
+      <source src="/placeholder.mp4" type="video/mp4">
+    </video>
+    <div class="ep-hero-overlay"></div>
+    <div class="ep-hero-content">
+      <div style="font-size:9px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-family:var(--sans)">Series 1 — 2026</div>
+      <div style="font-family:var(--serif);font-size:clamp(32px,8vw,48px);line-height:0.93;letter-spacing:-1px;margin-bottom:10px">Manaia</div>
+      <p style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--sub);line-height:1.65">Ten episodes. One detective. A city that doesn't care.</p>
+    </div>
+  </div>
+  <div class="wrap" style="padding-bottom:64px">
+
+    <!-- SERIES PASS -->
+    <div class="episodes-container">
+      <div class="series-pass-block">
+        <div class="series-pass-eyebrow">Series Pass</div>
+        <div class="series-pass-headline">All 10 episodes — one payment</div>
+        <ul class="series-pass-benefits">
+          <li>Price locks now — rises as episodes sell out.</li>
+          <li>Instant access when each episode drops.</li>
+          <li>More affordable than buying individually.</li>
+        </ul>
+        <div style="margin-bottom:14px">
+          <div style="height:1px;background:var(--rule);position:relative;margin-bottom:8px">
+            <div id="series-pass-bar" style="position:absolute;left:0;top:0;height:100%;background:var(--accent);width:0%"></div>
+          </div>
+          <div id="series-pass-remaining" style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:0.5px"></div>
+        </div>
+        <div class="series-pass-pricing">
+          <span class="series-pass-price" id="series-pass-price">$15</span>
+          <span class="series-pass-compare" id="series-pass-compare">vs. $20+ buying each individually</span>
+        </div>
+        <button class="btn btn-primary" id="series-pass-btn" style="width:100%;text-align:center">Get Series Pass · $15</button>
+        <div id="series-pass-social" style="margin-top:12px;font-size:11px;font-weight:300;color:var(--sub);text-align:center"></div>
+        <div id="series-pass-form" style="margin-top:0"></div>
+      </div>
+
+      <div class="section-header" style="padding:20px 20px 0">
+        <div class="section-label">Episodes</div>
+      </div>
+      <div id="episode-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ ABOUT SHEET ════════════════════════════════════════ -->
+<div class="info-sheet" id="sheet-about" role="dialog" aria-modal="true" aria-label="About Manaia">
+  <div class="sheet-header">
+    <div class="sheet-title">About</div>
+    <button class="sheet-close" onclick="closeSheet('about')" aria-label="Close">✕</button>
+  </div>
+  <div class="sheet-body">
+    <p class="sheet-desc">When a young Māori man vanishes from Wellington's waterfront, detective Manaia Parata is the only one who thinks it matters. A ten-part microdrama set in the city that never quite sleeps.</p>
+
+    <div id="sheet-watch-btn" style="margin-bottom:12px"></div>
+    <div id="sheet-pass-btn" style="margin-bottom:28px">
+      <button class="btn btn-ghost" onclick="closeSheet('about');switchTab('episodes')" style="width:100%;text-align:center;font-size:10px;padding:11px 16px;letter-spacing:2px">Series Pass · $15 — all 10 episodes</button>
+    </div>
+
+    <div class="sheet-meta">
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Genre</span>
+        <span class="sheet-meta-val">Crime · Drama · Mystery</span>
+      </div>
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Episodes</span>
+        <span class="sheet-meta-val">10 × ~2:30 min — fortnightly drops</span>
+      </div>
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Language</span>
+        <span class="sheet-meta-val">Te Reo Māori / English</span>
+      </div>
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Rating</span>
+        <span class="sheet-meta-val">M — Suitable for mature audiences</span>
+      </div>
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Advisory</span>
+        <span class="sheet-meta-val">Themes of missing persons, wānanga, mild violence</span>
+      </div>
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Location</span>
+        <span class="sheet-meta-val">Wellington, Aotearoa New Zealand</span>
+      </div>
+      <div class="sheet-meta-row">
+        <span class="sheet-meta-label">Where</span>
+        <span class="sheet-meta-val">Exclusive to this platform</span>
+      </div>
+    </div>
+
+    <div class="sheet-section-label">From the director</div>
+    <p class="sheet-creator-note">"Manaia started as a question — what happens when the city ignores you? This is a story about who gets looked for, and who doesn't."</p>
+    <div class="sheet-creator-attr">— Writer / Director</div>
+
+    <div class="share-section" style="margin-top:36px">
+      <div class="share-label">Share</div>
+      <div class="share-btns">
+        <button class="share-btn" onclick="shareNative()">Share ↗</button>
+        <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
+        <button class="share-btn" onclick="copyLink(this)">Copy link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CAST + CREW SHEET ═══════════════════════════════════ -->
+<div class="info-sheet" id="sheet-crew" role="dialog" aria-modal="true" aria-label="Cast and Crew">
+  <div class="sheet-header">
+    <div class="sheet-title">Cast + Crew</div>
+    <button class="sheet-close" onclick="closeSheet('crew')" aria-label="Close">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="crew-group">
+      <div class="crew-group-label">Cast</div>
+      <div class="crew-row"><div class="crew-role">Cassino</div><div class="crew-name">TBC</div></div>
+      <div class="crew-row"><div class="crew-role">Dickie</div><div class="crew-name">TBC</div></div>
+      <div class="crew-row"><div class="crew-role">Det. Rawiri Tūhoe</div><div class="crew-name">James Meihana</div></div>
+      <div class="crew-row"><div class="crew-role">Aroha Walker</div><div class="crew-name">Ngāhuia Te Ao</div></div>
+      <div class="crew-row"><div class="crew-role">Sgt. Paora Reid</div><div class="crew-name">Tūmataiti Flavell</div></div>
+    </div>
+    <div class="crew-group">
+      <div class="crew-group-label">Direction &amp; Writing</div>
+      <div class="crew-row"><div class="crew-role">Writer / Director</div><div class="crew-name">Te Māia Tūhoe</div></div>
+      <div class="crew-row"><div class="crew-role">Producer</div><div class="crew-name">Hera Ngāta</div></div>
+      <div class="crew-row"><div class="crew-role">Executive Producer</div><div class="crew-name">Rangi Pārata</div></div>
+    </div>
+    <div class="crew-group">
+      <div class="crew-group-label">Camera &amp; Sound</div>
+      <div class="crew-row"><div class="crew-role">Director of Photography</div><div class="crew-name">Luca Ferreira</div></div>
+      <div class="crew-row"><div class="crew-role">Sound Recordist</div><div class="crew-name">Sam Wikiriwhi</div></div>
+      <div class="crew-row"><div class="crew-role">Sound Design</div><div class="crew-name">Aroha Kingi</div></div>
+    </div>
+    <div class="crew-group">
+      <div class="crew-group-label">Post-Production</div>
+      <div class="crew-row"><div class="crew-role">Editor</div><div class="crew-name">Ben Tait</div></div>
+      <div class="crew-row"><div class="crew-role">Colour Grade</div><div class="crew-name">Mia Shortland</div></div>
+      <div class="crew-row"><div class="crew-role">Original Score</div><div class="crew-name">Tāne Māhuta Collective</div></div>
+    </div>
+    <div class="crew-group">
+      <div class="crew-group-label">Acknowledgements</div>
+      <div class="crew-row"><div class="crew-role">Reo Māori advisor</div><div class="crew-name">Dr Mere Kāhu</div></div>
+      <div class="crew-row"><div class="crew-role">Filmed on</div><div class="crew-name">Te Whanganui-a-Tara<small>We acknowledge Ngāti Toa Rangatira, Te Āti Awa, and Taranaki Whānui as tangata whenua.</small></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOP SHEET ═══════════════════════════════════════════ -->
+<div class="info-sheet" id="sheet-shop" role="dialog" aria-modal="true" aria-label="Shop">
+  <div class="sheet-header">
+    <div class="sheet-title">Hoko | Shop</div>
+    <button class="sheet-close" onclick="closeSheet('shop')" aria-label="Close">✕</button>
+  </div>
+  <div class="sheet-body">
+
+    <p style="font-family:var(--serif);font-style:italic;font-size:13px;color:var(--sub);line-height:1.65;margin:0 0 28px;">Limited objects from the world of Manaia.</p>
+
+    <!-- Item 1 — T-Shirt -->
+    <div class="shop-item">
+      <div class="shop-item-img">
+        <img src="/shop-tshirt.png" alt="Manaia Co. T-Shirt" style="display:block">
+      </div>
+      <div class="shop-item-top">
+        <div class="shop-item-title">Manaia Co. — T-Shirt</div>
+        <div class="shop-item-price">$55</div>
+      </div>
+      <div class="shop-item-desc">100% cotton. Black. Manaia Co. label. Sizes S–XXL.</div>
+      <div class="shop-item-meta">
+        <span class="shop-badge">Limited run</span>
+        <span class="shop-stock">50 remaining</span>
+      </div>
+      <button class="btn shop-btn" onclick="shopOrder('tshirt', 'Manaia Co. — T-Shirt', 55)">Order →</button>
+    </div>
+
+    <!-- Item 2 — Vinyl -->
+    <div class="shop-item">
+      <div class="shop-item-img">
+        <img src="/shop-vinyl.png" alt="Original Score — Vinyl" style="display:block">
+      </div>
+      <div class="shop-item-top">
+        <div class="shop-item-title">Original Score — Vinyl</div>
+        <div class="shop-item-price">$65</div>
+      </div>
+      <div class="shop-item-desc">The Manaia Series Recordings. White vinyl, pressed 2024. Fingerprint edition — each copy unique.</div>
+      <div class="shop-item-meta">
+        <span class="shop-badge">Limited — 50 only</span>
+        <span class="shop-stock">50 remaining</span>
+      </div>
+      <button class="btn shop-btn" onclick="shopOrder('vinyl', 'Original Score — Vinyl', 65)">Order →</button>
+    </div>
+
+    <!-- Item 3 — Collector's Script -->
+    <div class="shop-item" style="border-bottom:none">
+      <div class="shop-item-img">
+        <img src="/shop-script.png" alt="Shooting Script" style="display:block">
+      </div>
+      <div class="shop-item-top">
+        <div class="shop-item-title">EP.01 — Shooting Script</div>
+        <div class="shop-item-price">$25</div>
+      </div>
+      <div class="shop-item-desc">The original shooting script for Episode 1, printed and bound. Hand-numbered, signed by the writer.</div>
+      <div class="shop-item-meta">
+        <span class="shop-badge">Limited — 50 only</span>
+        <span class="shop-stock">50 remaining</span>
+      </div>
+      <button class="btn shop-btn" onclick="shopOrder('script', 'EP.01 — Shooting Script', 25)">Order →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- TRAILER MODAL -->
+<div class="modal-overlay" id="trailer-modal" role="dialog" aria-modal="true" aria-label="Trailer" onclick="closeTrailerIfBg(event)">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <div class="modal-label">Manaia — Trailer</div>
+      <button class="modal-close" onclick="closeTrailer()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-video">
+      <video controls preload="none" poster="" id="modal-video-el">
+        <source src="/placeholder.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DAY   = 86400000;
+  const MONTH = DAY * 30;
+  const NOW   = Date.now();
+  const TOTAL = 2500;
+  const PASS_TOTAL = 200;
+  const PASS_REMAINING = 63;
+
+  const EPISODES = [
+    { num:'01', title:'The Disappearance of Hemi Walker', drops:null,            opensAt: NOW - DAY,                  remaining:2500 },
+    { num:'02', title:'Taniwha Street',                   drops:NOW+14*DAY,      opensAt: NOW+14*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'03', title:'Two Fires',                        drops:NOW+28*DAY,      opensAt: NOW+28*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'04', title:'Kaitiaki',                         drops:NOW+42*DAY,      opensAt: NOW+42*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'05', title:'The Long Drive North',             drops:NOW+56*DAY,      opensAt: NOW+56*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'06', title:'Aroha',                            drops:NOW+70*DAY,      opensAt: NOW+70*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'07', title:'The River Remembers',              drops:NOW+84*DAY,      opensAt: NOW+84*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'08', title:'Under the Pōhutukawa',             drops:NOW+98*DAY,      opensAt: NOW+98*DAY  + 6*MONTH,      remaining:2500 },
+    { num:'09', title:'Before the Tide',                  drops:NOW+112*DAY,     opensAt: NOW+112*DAY + 6*MONTH,      remaining:2500 },
+    { num:'10', title:'Manaia',                           drops:NOW+126*DAY,     opensAt: NOW+126*DAY + 6*MONTH,      remaining:2500 },
+  ];
+
+  function epState(ep) {
+    if (ep.drops && ep.drops > NOW) return 'locked';
+    if (ep.opensAt && ep.opensAt <= NOW) return 'open';
+    if (ep.remaining === 0) return 'soldout';
+    return 'available';
+  }
+  function priceFloor(r) {
+    const p = r / TOTAL;
+    if (p > .70) return 5;
+    if (p > .40) return 10;
+    if (p > .15) return 15;
+    if (r > 0)   return 20;
+    return null;
+  }
+  function tierInfo(r) {
+    const p = r / TOTAL;
+    if (p > .70) return { label:'Early access', cls:'' };
+    if (p > .40) return { label:'Second tier',  cls:'t2' };
+    if (p > .15) return { label:'Third tier',   cls:'t3' };
+    if (r > 0)   return { label:'Last tickets',  cls:'t4' };
+    return { label:'Sold out', cls:'t4' };
+  }
+  function calcSeriesPass() {
+    let total = 0;
+    EPISODES.forEach(ep => {
+      const s = epState(ep);
+      if (s === 'open') return; // already free — no value
+      const p = priceFloor(ep.remaining);
+      if (p) total += p;
+    });
+    const passPrice = Math.max(5, Math.round(total * 0.75));
+    return { passPrice, individualTotal: total };
+  }
+  function renderSeriesPass() {
+    const { passPrice, individualTotal } = calcSeriesPass();
+    const el = document.getElementById('series-pass-price');
+    const cmp = document.getElementById('series-pass-compare');
+    const btn = document.getElementById('series-pass-btn');
+    if (el)  el.textContent = `$${passPrice}`;
+    if (cmp) cmp.textContent = `vs. $${individualTotal}+ buying each individually`;
+    if (btn) btn.textContent = `Get Series Pass · $${passPrice}`;
+    const remaining = document.getElementById('series-pass-remaining');
+    if (remaining) remaining.textContent = `${PASS_REMAINING} of ${PASS_TOTAL} passes remaining`;
+    const bar = document.getElementById('series-pass-bar');
+    if (bar) bar.style.width = `${((PASS_TOTAL - PASS_REMAINING) / PASS_TOTAL * 100).toFixed(1)}%`;
+    const social = document.getElementById('series-pass-social');
+    const supporters = PASS_TOTAL - PASS_REMAINING;
+    if (social && supporters > 0) social.textContent = `${supporters} people already in`;
+  }
+  function nextTierMsg(remaining) {
+    if (remaining > 700) return `Next ticket jump — $10`;
+    if (remaining > 400) return `Next ticket jump — $20`;
+    if (remaining > 150) return `Next ticket jump — $30`;
+    return null;
+  }
+  function fmt(ts) {
+    return new Date(ts).toLocaleDateString('en-NZ',{day:'numeric',month:'long',year:'numeric'});
+  }
+  function fmtCal(ts) {
+    const d = new Date(ts);
+    return d.getUTCFullYear()
+      + String(d.getUTCMonth()+1).padStart(2,'0')
+      + String(d.getUTCDate()).padStart(2,'0');
+  }
+  function calGoogle(ep) {
+    const start = fmtCal(ep.opensAt);
+    const end   = fmtCal(ep.opensAt + 86400000);
+    const title = encodeURIComponent(`Manaia — Watch free: ${ep.title}`);
+    const details = encodeURIComponent('Episode now open for free. Watch at manaia.nz');
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
+  }
+  function calIcs(ep) {
+    const start = fmtCal(ep.opensAt);
+    const end   = fmtCal(ep.opensAt + 86400000);
+    const ics = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Manaia//EN',
+      'BEGIN:VEVENT',
+      `DTSTART;VALUE=DATE:${start}`,
+      `DTEND;VALUE=DATE:${end}`,
+      `SUMMARY:Manaia — Watch free: ${ep.title}`,
+      'DESCRIPTION:Episode now open for free. Watch at manaia.nz',
+      'END:VEVENT','END:VCALENDAR'
+    ].join('\r\n');
+    const blob = new Blob([ics], {type:'text/calendar'});
+    return URL.createObjectURL(blob);
+  }
+  function toggleCalPicker(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  }
+  function countdown(ts) {
+    const diff = ts - Date.now();
+    if (diff <= 0) return 'Dropping now';
+    const d = Math.floor(diff / DAY);
+    const h = Math.floor((diff % DAY) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    if (d > 0) return `${d}d`;
+    return `${pad(h)}h  ${pad(m)}m`;
+  }
+  function pad(n) { return String(n).padStart(2,'0'); }
+
+  // ─── KOHA FORM ────────────────────────────────────────────
+  function kohaFormHTML(id, minPrice, label, open) {
+    return `
+      <div class="koha-wrap${open ? ' open' : ''}" id="koha-${id}">
+        <div class="koha-title">Koha ${label} — gift access</div>
+        <div class="koha-fields">
+          <div class="field field-full">
+            <label for="ke-${id}">Recipient email</label>
+            <input id="ke-${id}" type="email" placeholder="their@email.com" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="kn-${id}">Your name <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input id="kn-${id}" type="text" placeholder="Leave blank to send anonymously">
+          </div>
+          <div class="field">
+            <label for="km-${id}">Note <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input id="km-${id}" type="text" placeholder="A message for them">
+          </div>
+        </div>
+        <div class="anon-row">
+          <input type="checkbox" id="anon-${id}">
+          <label for="anon-${id}">Send anonymously — recipient won't see your name</label>
+        </div>
+        <div class="koha-foot">
+          <div class="koha-price">
+            <div class="koha-price-label">Pay what you want</div>
+            <div class="koha-amount-wrap" style="margin-left:10px">
+              <div class="koha-currency" aria-hidden="true">$</div>
+              <label for="ka-${id}" class="sr-only">Amount NZD, minimum $${minPrice}</label>
+              <input class="koha-amount" id="ka-${id}" type="number" value="${minPrice}" min="${minPrice}">
+            </div>
+            <div class="koha-price-label" style="margin-left:4px">min $${minPrice}</div>
+          </div>
+          <button class="btn btn-primary" onclick="sendKoha('${id}')">Send koha →</button>
+        </div>
+      </div>`;
+  }
+
+  // ─── RENDER NOW TAB (current ep only) ────────────────────
+  function renderNow() {
+    const ep = EPISODES[0];
+    const s = epState(ep);
+    const price = priceFloor(ep.remaining);
+    const { label, cls } = tierInfo(ep.remaining);
+    const fillPct = ((TOTAL - ep.remaining) / TOTAL * 100).toFixed(1);
+    const passCls = cls ? `passes-text ${cls}` : 'passes-text';
+    const panel = document.getElementById('now-ep-panel');
+    const posterContent = document.getElementById('poster-content');
+
+    // ── POSTER CONTENT — visible immediately, no scroll ──
+    let posterHtml = `
+      <div class="poster-title">Manaia</div>
+      <div class="poster-ep-title">${ep.title}</div>
+      <div class="poster-eyebrow">Series 1 — 2026</div>
+      <div class="badge-aotearoa" role="note" aria-label="Made in Aotearoa New Zealand">Aotearoa</div>`;
+
+    if (s === 'available') {
+      posterHtml += `
+        <div class="poster-bar-track" role="meter" aria-valuenow="${ep.remaining}" aria-valuemin="0" aria-valuemax="${TOTAL}" aria-label="${ep.remaining} of ${TOTAL} passes remaining">
+          <div class="poster-bar-fill" style="width:${fillPct}%"></div>
+          <div class="bar-tick" style="left:30%" aria-hidden="true"><div class="bar-tick-label">$5</div></div>
+          <div class="bar-tick" style="left:60%" aria-hidden="true"><div class="bar-tick-label">$10</div></div>
+          <div class="bar-tick" style="left:85%" aria-hidden="true"><div class="bar-tick-label">$20</div></div>
+        </div>
+        <div class="poster-scarcity-row">
+          <div class="poster-passes"><b>${ep.remaining.toLocaleString()}</b> tickets remaining</div>
+        </div>
+        <div class="poster-actions">
+          <button class="btn btn-primary" onclick="claimPass('01',${price})"><span>Enjoy</span><span class="btn-watch-price">$${price}</span></button>
+          <button class="btn-koha-poster" onclick="toggleKoha('koha-now')" aria-expanded="false" aria-controls="koha-now" aria-label="Koha — gift this episode">
+            <span class="btn-koha-poster-main">Koha | Gift</span>
+            <span class="btn-koha-poster-sub">Episode</span>
+          </button>
+        </div>
+        ${nextTierMsg(ep.remaining) ? `<div class="poster-tier-msg">${nextTierMsg(ep.remaining)}</div>` : ''}
+        <div class="poster-open-date" style="position:relative">
+          <span>Watch free — ${fmt(ep.opensAt)}</span>
+          <div style="position:relative">
+            <button class="cal-link" onclick="toggleCalPicker('cal-picker-now')">+ Add to calendar</button>
+            <div class="cal-picker" id="cal-picker-now">
+              <a href="${calGoogle(ep)}" target="_blank" rel="noopener" onclick="toggleCalPicker('cal-picker-now')">Google Calendar</a>
+              <a href="#" onclick="event.preventDefault();var u=calIcs(ep);var a=document.createElement('a');a.href=u;a.download='manaia-free.ics';a.click();toggleCalPicker('cal-picker-now')">Apple / Outlook (.ics)</a>
+            </div>
+          </div>
+        </div>`;
+    } else if (s === 'open') {
+      posterHtml += `
+        <div class="poster-actions">
+          <button class="btn btn-primary" onclick="watchEpisode('01')" style="flex:1;text-align:center;justify-content:center">Enjoy — free</button>
+          <button class="btn btn-ghost" onclick="shareNative()" style="align-self:stretch;display:flex;align-items:center;justify-content:center;padding:0 20px">Share ↗</button>
+        </div>`;
+    } else if (s === 'soldout') {
+      posterHtml += `
+        <div class="poster-scarcity-row">
+          <div class="poster-passes" style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(232,228,220,.9)"><b>Sold out</b></div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--sub);letter-spacing:0.5px;margin-top:3px">All 1,000 tickets claimed</div>
+        </div>
+        <div class="poster-actions">
+          <button class="btn btn-disabled" disabled style="flex:1;text-align:center;opacity:.35">Sold out</button>
+        </div>
+        <div class="poster-open-date" style="position:relative">
+          <span>Watch free — ${fmt(ep.opensAt)}</span>
+          <div style="position:relative">
+            <button class="cal-link" onclick="toggleCalPicker('cal-picker-now')">+ Add to calendar</button>
+            <div class="cal-picker" id="cal-picker-now">
+              <a href="${calGoogle(ep)}" target="_blank" rel="noopener" onclick="toggleCalPicker('cal-picker-now')">Google Calendar</a>
+              <a href="#" onclick="event.preventDefault();var u=calIcs(ep);var a=document.createElement('a');a.href=u;a.download='manaia-free.ics';a.click();toggleCalPicker('cal-picker-now')">Apple / Outlook (.ics)</a>
+            </div>
+          </div>
+        </div>`;
+    }
+    posterHtml += `
+      <div class="inner-tabs" style="margin-top:16px">
+        <button class="inner-tab" onclick="switchTab('series')">Series</button>
+        <button class="inner-tab" onclick="openSheet('crew')">Cast + Crew</button>
+        <button class="inner-tab" onclick="openSheet('shop')">Shop</button>
+      </div>`;
+
+    posterContent.innerHTML = posterHtml;
+    panel.innerHTML = '';
+
+    // watch button in about sheet
+    const sheetBtn = document.getElementById('sheet-watch-btn');
+    if (sheetBtn) {
+      if (s === 'available') {
+        sheetBtn.innerHTML = `<button class="btn btn-primary" onclick="claimPass('01',${price});closeSheet('about')" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 20px;font-size:10px;letter-spacing:3px"><span>Enjoy</span><span style="font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:0;color:var(--bg);opacity:0.75">$${price}</span></button>`;
+      } else if (s === 'open') {
+        sheetBtn.innerHTML = `<button class="btn btn-primary" onclick="watchEpisode('01');closeSheet('about')" style="width:100%;text-align:center">Enjoy — free</button>`;
+      } else if (s === 'soldout') {
+        sheetBtn.innerHTML = `<button class="btn btn-disabled" disabled style="width:100%;text-align:center;opacity:.35">Sold out</button>`;
+      }
+    }
+
+    // watch bar — mobile fallback (belt and braces)
+    const bar = document.getElementById('watch-bar-inner');
+    if (!bar) return;
+    if (s === 'available') {
+      bar.innerHTML = `
+        <div class="watch-bar-meta">
+          <span class="watch-bar-price">$${price} <span style="font-size:9px;font-weight:400;color:var(--sub);letter-spacing:1px">MINIMUM</span></span>
+          <span class="watch-bar-passes">${ep.remaining.toLocaleString()} tickets left</span>
+        </div>
+        <button class="btn btn-primary" onclick="claimPass('01',${price})">Enjoy</button>
+        <button class="watch-bar-koha" onclick="toggleKoha('koha-now')">Koha / gift this episode →</button>`;
+    } else if (s === 'open') {
+      bar.innerHTML = `
+        <button class="btn btn-primary" onclick="watchEpisode('01')">Enjoy — free</button>
+        <button class="watch-bar-koha" onclick="toggleKoha('koha-now')">Koha / gift this episode →</button>`;
+    } else if (s === 'soldout') {
+      bar.innerHTML = `
+        <div class="watch-bar-meta">
+          <span class="watch-bar-passes">Watch free — ${fmt(ep.opensAt)}</span>
+        </div>
+        <button class="btn btn-disabled" disabled>Sold out</button>`;
+    }
+  }
+
+  // ─── RENDER SERIES TAB ────────────────────────────────────
+  function renderSeries() {
+    const list = document.getElementById('episode-list');
+    list.innerHTML = '';
+
+    EPISODES.forEach(ep => {
+      list.appendChild(buildEpisodeRow(ep));
+    });
+
+  }
+
+  function buildEpisodeRow(ep) {
+    const s = epState(ep);
+    const price = priceFloor(ep.remaining);
+    const { label, cls } = tierInfo(ep.remaining);
+    const fillPct = ((TOTAL - ep.remaining) / TOTAL * 100).toFixed(1);
+    const passCls = cls ? `passes-text ${cls}` : 'passes-text';
+
+    const el = document.createElement('div');
+    el.className = 'episode' + (s === 'locked' ? ' locked' : '');
+
+    const top = `
+      <div class="ep-top">
+        <div class="ep-num" aria-hidden="true">EP.${ep.num}</div>
+        <div class="ep-title">${ep.title}</div>
+      </div>`;
+
+    if (s === 'locked') {
+      el.innerHTML = top + `
+        <div class="drops-row">
+          <div class="drops-label" aria-hidden="true">Drops in</div>
+          <div class="countdown" data-ts="${ep.drops}">${countdown(ep.drops)}</div>
+        </div>
+        <div class="locked-actions">
+          <button class="btn" style="font-size:10px;padding:7px 12px;white-space:nowrap;background:#ECEAE4;color:#111;border-color:#ECEAE4" onclick="toggleKoha('pre-${ep.num}')">Pre-purchase</button>
+          <div style="position:relative">
+            <button class="cal-link" onclick="toggleCalPicker('drop-cal-${ep.num}')">+ Calendar</button>
+            <div class="cal-picker" id="drop-cal-${ep.num}">
+              <a href="${calGoogle({...ep, opensAt: ep.drops})}" target="_blank" rel="noopener" onclick="toggleCalPicker('drop-cal-${ep.num}')">Google Calendar</a>
+              <a href="#" onclick="event.preventDefault();var u=calIcs({...ep,opensAt:ep.drops,title:'Manaia EP.${ep.num} drops — '+ep.title});var a=document.createElement('a');a.href=u;a.download='manaia-ep${ep.num}-drop.ics';a.click();toggleCalPicker('drop-cal-${ep.num}')">Apple / Outlook (.ics)</a>
+            </div>
+          </div>
+          <button class="cal-link" id="notify-btn-${ep.num}" onclick="toggleNotify('${ep.num}')">✉ Notify</button>
+        </div>
+        <div class="notify-inline" id="notify-wrap-${ep.num}">
+          <input class="notify-inline-input notify-name" type="text" placeholder="First name">
+          <div class="notify-inline-row">
+            <input class="notify-inline-input notify-email" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')submitNotify('${ep.num}')">
+            <button class="notify-inline-submit" onclick="submitNotify('${ep.num}')">Send →</button>
+          </div>
+        </div>
+        ${kohaFormHTML('pre-' + ep.num, 5, 'EP.' + ep.num + ' — ' + ep.title, false)}`;
+
+    } else if (s === 'open') {
+      el.innerHTML = top + `
+        <div class="ep-foot">
+          <div class="open-badge">Free to watch</div>
+          <div class="ep-actions">
+            <button class="btn btn-primary" onclick="watchEpisode('${ep.num}')">Enjoy</button>
+          </div>
+        </div>`;
+
+    } else if (s === 'soldout') {
+      el.innerHTML = top + `
+        <div class="ep-foot">
+          <div class="open-date" style="font-family:var(--mono);font-size:10px;color:var(--sub)">Watch free — ${fmt(ep.opensAt)}</div>
+          <button class="btn btn-disabled" disabled>Sold out</button>
+        </div>`;
+
+    } else {
+      el.innerHTML = top + `
+        <div class="scarcity" aria-label="${ep.remaining.toLocaleString()} of ${TOTAL.toLocaleString()} passes remaining">
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill ${cls}" style="width:${fillPct}%"></div>
+          </div>
+          <div class="scarcity-row" aria-hidden="true">
+            <div class="${passCls}"><b>${ep.remaining.toLocaleString()}</b> of ${TOTAL.toLocaleString()} tickets remaining</div>
+            <div class="tier-name">${label}</div>
+          </div>
+        </div>
+        <div class="ep-foot">
+          <div>
+            <div class="ep-price">
+              <div class="ep-price-amount">$${price}</div>
+              <div class="ep-price-min">min</div>
+            </div>
+            <div class="ep-open-date">Watch free — ${fmt(ep.opensAt)}</div>
+          </div>
+          <div class="ep-actions">
+            <button class="btn btn-primary" onclick="claimPass('${ep.num}', ${price})">Enjoy</button>
+          </div>
+        </div>
+        ${kohaFormHTML(ep.num, price, 'EP.' + ep.num, false)}`;
+    }
+    return el;
+  }
+
+  // ─── INFO SHEETS (About / Cast+Crew) ─────────────────────
+  function openSheet(name) {
+    document.getElementById('sheet-' + name).classList.add('open');
+    document.body.style.overflow = 'hidden';
+    history.pushState({ sheet: name }, '', '#sheet-' + name);
+  }
+  function shopOrder(id, name, price) {
+    // TODO: wire to Stripe when ready
+    const btn = event.currentTarget;
+    btn.textContent = '✓ Coming soon';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = 'Order →'; btn.disabled = false; }, 2000);
+  }
+  function closeSheet(name) {
+    document.getElementById('sheet-' + name).classList.remove('open');
+    document.body.style.overflow = '';
+    if (history.state && history.state.sheet === name) history.back();
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['about','crew','shop'].forEach(n => {
+        const s = document.getElementById('sheet-' + n);
+        if (s && s.classList.contains('open')) closeSheet(n);
+      });
+    }
+  });
+
+  // ─── NOTIFY ME ────────────────────────────────────────────
+  function toggleNotify(epNum) {
+    const wrap = document.getElementById('notify-wrap-' + epNum);
+    if (!wrap) return;
+    const isOpen = wrap.classList.toggle('open');
+    if (isOpen) wrap.querySelector('input').focus();
+  }
+  async function submitNotify(epNum) {
+    const wrap = document.getElementById('notify-wrap-' + epNum);
+    const nameInput = wrap.querySelector('.notify-name');
+    const emailInput = wrap.querySelector('.notify-email');
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput.value.trim();
+    if (!email || !email.includes('@')) { emailInput.focus(); return; }
+
+    emailInput.disabled = true;
+    if (nameInput) nameInput.disabled = true;
+    const submit = wrap.querySelector('button');
+    submit.textContent = 'Sending…';
+
+    try {
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, episode: epNum }),
+      });
+    } catch (_) {
+      // fail silently — still confirm to user
+    }
+
+    submit.textContent = '✓ Noted';
+    submit.style.color = 'var(--accent)';
+    const btn = document.getElementById('notify-btn-' + epNum);
+    if (btn) { btn.textContent = '✓ Reminded'; btn.style.color = 'var(--accent)'; btn.disabled = true; }
+  }
+
+  // ─── SHARE ────────────────────────────────────────────────
+  function shareNative() {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'Manaia — A Detective Series', text: 'Watch Manaia EP.01 — The Disappearance of Hemi Walker', url });
+    } else { copyLink(); }
+  }
+  function shareWhatsApp() {
+    const text = encodeURIComponent('Watch Manaia EP.01 — ' + window.location.href);
+    window.open('https://wa.me/?text=' + text, '_blank', 'noopener');
+  }
+  function copyLink(btn) {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      if (btn) { btn.textContent = 'Copied ✓'; btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000); }
+    });
+  }
+
+  // ─── TABS ─────────────────────────────────────────────────
+  function switchTab(name, pushState = true) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    document.getElementById('panel-' + name).classList.add('active');
+    const btn = document.getElementById('tab-' + name);
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    window.scrollTo(0,0);
+    if (pushState) history.pushState({ tab: name }, '', '#' + name);
+  }
+
+  // ─── INTERACTIONS ─────────────────────────────────────────
+  function toggleKoha(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isOpen = el.classList.toggle('open');
+    const btn = document.querySelector(`[aria-controls="${id}"]`);
+    if (btn) btn.setAttribute('aria-expanded', isOpen);
+    if (isOpen) el.querySelector('input[type=email]')?.focus();
+  }
+  function claimPass(num, floor) {
+    alert(`EP.${num} — pay what you want (min $${floor})\nStripe checkout coming soon.`);
+  }
+  function watchEpisode(num) {
+    alert(`EP.${num} — loading player…\nVideo delivery coming soon.`);
+  }
+  function sendKoha(id) {
+    const wrap = document.getElementById(`koha-${id}`);
+    const email = wrap.querySelector('input[type=email]').value.trim();
+    const amount = wrap.querySelector('.koha-amount').value;
+    const name = wrap.querySelector('input[type=text]')?.value.trim();
+    const isAnon = wrap.querySelector('input[type=checkbox]')?.checked;
+    if (!email) { wrap.querySelector('input[type=email]').focus(); return; }
+    alert(`Koha${isAnon ? ' (anonymous)' : name ? ` from ${name}` : ''} → ${email}\n$${amount} NZD\nStripe + Resend coming soon.`);
+  }
+  function subscribeNotify() {
+    const input = document.getElementById('notify-email');
+    const email = input.value.trim();
+    if (!email) { input.focus(); return; }
+    alert(`Subscribed: ${email}\nResend integration coming soon.`);
+  }
+
+  // ─── TRAILER ──────────────────────────────────────────────
+  function openTrailer() {
+    const m = document.getElementById('trailer-modal');
+    m.classList.add('open');
+    m.querySelector('.modal-close').focus();
+  }
+  function closeTrailer() { document.getElementById('trailer-modal').classList.remove('open'); }
+  function closeTrailerIfBg(e) { if (e.target === e.currentTarget) closeTrailer(); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTrailer(); });
+
+  // ─── COUNTDOWN TICK ───────────────────────────────────────
+  function tick() {
+    document.querySelectorAll('.countdown[data-ts]').forEach(el => {
+      el.textContent = countdown(Number(el.dataset.ts));
+    });
+  }
+
+  // ─── CREATOR VIDEO THUMB ──────────────────────────────────
+  function playCreatorVideo() {
+    const thumb = document.getElementById('creator-thumb');
+    const vid   = document.getElementById('creator-video');
+    if (!thumb || !vid) return;
+    thumb.classList.add('playing');
+    vid.style.display = 'block';
+    vid.play();
+  }
+
+  // ─── POSTER AMBIENT VIDEO ─────────────────────────────────
+  (function initPosterVideo() {
+    const vid = document.getElementById('poster-video');
+    if (!vid) return;
+
+    const fadeIn = () => vid.classList.add('playing');
+
+    const tryPlay = () => {
+      vid.muted = true;
+      vid.volume = 0;
+      const p = vid.play();
+      if (p !== undefined) {
+        p.then(fadeIn).catch(() => {
+          // Safari blocked — show on first touch/click
+          const onInteract = () => {
+            vid.play().then(fadeIn).catch(() => {});
+          };
+          document.addEventListener('touchstart', onInteract, { once: true });
+          document.addEventListener('click', onInteract, { once: true });
+        });
+      } else {
+        // Older Safari — no promise returned
+        fadeIn();
+      }
+    };
+
+    // Multiple event hooks for cross-browser reliability
+    ['playing', 'canplay', 'loadeddata'].forEach(evt => {
+      vid.addEventListener(evt, fadeIn, { once: true });
+    });
+
+    // Force show after 1.5s regardless — belt and braces
+    setTimeout(fadeIn, 1500);
+
+    if (vid.readyState >= 2) {
+      tryPlay();
+    } else {
+      vid.addEventListener('loadedmetadata', tryPlay, { once: true });
+      vid.load();
+    }
+  })();
+
+  (function initSeriesVideo() {
+    const vid = document.getElementById('series-video');
+    if (!vid) return;
+    vid.addEventListener('playing', () => vid.classList.add('playing'), { once: true });
+    vid.addEventListener('canplay', () => { vid.play().catch(() => {}); }, { once: true });
+  })();
+
+  // ─── POSTER IMAGE ─────────────────────────────────────────
+  // To add your poster: set POSTER_SRC to the image path
+  const POSTER_SRC = ''; // e.g. 'poster.jpg'
+  (function loadPoster() {
+    if (!POSTER_SRC) return;
+    const img = document.getElementById('poster-img');
+    const wrap = document.getElementById('poster');
+    img.onload = () => { img.classList.add('loaded'); wrap.classList.add('has-image'); };
+    img.onerror = () => {};
+    img.src = POSTER_SRC;
+  })();
+
+  // ─── TRANSPARENT HEADER ON HERO ──────────────────────────
+  (function initHeaderFade() {
+    const header = document.querySelector('.header');
+    function updateHeader() {
+      const onEnjoy = document.getElementById('panel-now').classList.contains('active');
+      header.classList.toggle('transparent', onEnjoy && window.scrollY < 20);
+    }
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => setTimeout(updateHeader, 0));
+    });
+    updateHeader();
+  })();
+
+  // ─── SWIPE BETWEEN TABS ───────────────────────────────────
+  (function initSwipe() {
+    const tabs = ['now', 'series', 'episodes'];
+    let startX = 0;
+    document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].clientX - startX;
+      if (Math.abs(diff) < 60) return;
+      const current = tabs.findIndex(t => document.getElementById('panel-' + t).classList.contains('active'));
+      if (diff < 0 && current < tabs.length - 1) switchTab(tabs[current + 1]);
+      if (diff > 0 && current > 0) switchTab(tabs[current - 1]);
+    }, { passive: true });
+  })();
+
+  // ─── BACK BUTTON / HISTORY ────────────────────────────────
+  window.addEventListener('popstate', e => {
+    const state = e.state;
+    // close any open sheets first
+    ['about','crew'].forEach(n => {
+      const s = document.getElementById('sheet-' + n);
+      if (s && s.classList.contains('open')) {
+        s.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+    if (state && state.tab) {
+      switchTab(state.tab, false);
+    } else if (!state || (!state.sheet && !state.tab)) {
+      switchTab('now', false);
+    }
+  });
+
+  // ─── INIT ─────────────────────────────────────────────────
+  renderNow();
+  renderSeries();
+  renderSeriesPass();
+  setInterval(tick, 1000);
+  // seed initial history state
+  const initHash = location.hash.replace('#','');
+  const validTabs = ['now','series','episodes'];
+  if (validTabs.includes(initHash)) {
+    switchTab(initHash, false);
+    history.replaceState({ tab: initHash }, '', '#' + initHash);
+  } else {
+    history.replaceState({ tab: 'now' }, '', location.href);
+  }
+</script>
+</body>
+</html>

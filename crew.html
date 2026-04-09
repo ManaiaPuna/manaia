@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Puna — Crew</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #111110; --raised: #191918; --rule: #252523;
+      --dim: #444442; --sub: #666664; --text: #E8E6E1;
+      --accent: #C9894A;
+      --sans: 'Roboto', sans-serif;
+      --serif: 'DM Serif Display', serif;
+      --mono: 'DM Mono', monospace;
+    }
+    html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
+
+    .wrap { max-width: 560px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* header */
+    .header {
+      height: 52px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--rule); margin-bottom: 0; position: sticky;
+      top: 0; background: var(--bg); z-index: 10;
+    }
+    .brand { font-family: var(--serif); font-size: 18px; letter-spacing: 3px; text-transform: uppercase; }
+    .brand span { color: var(--accent); }
+    .header-action { font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); background: none; border: none; cursor: pointer; }
+
+    /* screens */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* labels */
+    .lbl { font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); display: block; }
+
+    /* ── AUTH ── */
+    .auth-wrap { padding: 60px 0 40px; }
+    .auth-title { font-family: var(--serif); font-size: 32px; line-height: 1.1; margin-bottom: 12px; }
+    .auth-sub { font-size: 13px; font-weight: 300; color: var(--sub); line-height: 1.75; }
+    .field { margin-bottom: 16px; margin-top: 32px; }
+    .field-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--sub); display: block; margin-bottom: 8px; }
+    .field-input {
+      width: 100%; background: var(--raised); border: 1px solid var(--rule);
+      color: var(--text); font-family: var(--sans); font-size: 14px; font-weight: 300;
+      padding: 12px 14px; outline: none; transition: border-color 0.15s;
+      -webkit-appearance: none; border-radius: 0;
+    }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--dim); }
+    .field-hint { font-size: 10px; font-weight: 300; color: var(--sub); margin-top: 6px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.5px; text-transform: uppercase; padding: 12px 24px;
+      border: none; cursor: pointer; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; width: 100%;
+    }
+    .btn:hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--rule); }
+
+    /* ── PROFILE ── */
+    .profile-block { padding: 36px 0 32px; border-bottom: 1px solid var(--rule); }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--raised); border: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .profile-avatar-initials { font-family: var(--serif); font-size: 24px; color: var(--dim); }
+    .profile-name { font-family: var(--serif); font-size: 28px; line-height: 1.1; margin-bottom: 6px; }
+    .profile-role { font-size: 13px; font-weight: 300; color: var(--sub); margin-bottom: 20px; }
+    .profile-bio-input {
+      width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--rule);
+      color: var(--text); font-family: var(--sans); font-size: 13px; font-weight: 300;
+      padding: 8px 0; outline: none; resize: none; line-height: 1.65;
+      transition: border-color 0.15s;
+    }
+    .profile-bio-input:focus { border-bottom-color: var(--accent); }
+    .profile-bio-input::placeholder { color: var(--dim); }
+    .profile-links { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+    .profile-link-input {
+      background: var(--raised); border: 1px solid var(--rule); color: var(--text);
+      font-family: var(--sans); font-size: 11px; font-weight: 300;
+      padding: 8px 12px; outline: none; flex: 1; min-width: 140px;
+      transition: border-color 0.15s;
+    }
+    .profile-link-input:focus { border-color: var(--accent); }
+    .profile-link-input::placeholder { color: var(--dim); }
+    .save-profile-btn {
+      font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+      background: none; border: none; color: var(--accent); cursor: pointer;
+      padding: 12px 0; transition: opacity 0.15s;
+    }
+    .save-profile-btn:hover { opacity: 0.7; }
+
+    /* profile public share */
+    .profile-share {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; margin-top: 8px; border-top: 1px solid var(--rule);
+    }
+    .profile-share-url { font-family: var(--mono); font-size: 10px; color: var(--sub); }
+    .copy-btn {
+      font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+      background: var(--raised); border: 1px solid var(--rule); color: var(--sub);
+      padding: 6px 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--sub); }
+
+    /* ── PROJECTS ── */
+    .projects-block { padding: 28px 0; border-bottom: 1px solid var(--rule); }
+    .project-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--raised); padding: 6px 12px; margin: 4px 4px 4px 0;
+    }
+    .project-pill-name { font-family: var(--serif); font-size: 14px; }
+    .project-pill-role { font-size: 10px; font-weight: 300; color: var(--sub); }
+
+    /* ── ROYALTIES ── */
+    .royalties-block { padding: 28px 0; border-bottom: 1px solid var(--rule); }
+    .royalty-total {
+      font-family: var(--mono); font-size: 48px; font-weight: 500;
+      color: var(--accent); line-height: 1; margin: 12px 0 4px;
+    }
+    .royalty-sub { font-size: 12px; font-weight: 300; color: var(--sub); margin-bottom: 24px; }
+    .royalty-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--rule);
+    }
+    .royalty-row:last-child { border-bottom: none; }
+    .royalty-label { font-size: 12px; font-weight: 400; }
+    .royalty-label-sub { font-size: 10px; font-weight: 300; color: var(--sub); margin-top: 2px; }
+    .royalty-val { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+    .royalty-val.zero { color: var(--dim); }
+
+    /* ── AGREEMENT ── */
+    .agreement-block { padding: 28px 0; }
+    .agreement-card {
+      background: var(--raised); padding: 20px;
+      border-left: 3px solid var(--accent); margin-bottom: 16px;
+    }
+    .agreement-card-title { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); margin-bottom: 12px; }
+    .agreement-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 8px 0; border-bottom: 1px solid var(--rule);
+    }
+    .agreement-row:last-child { border-bottom: none; }
+    .agreement-key { font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); }
+    .agreement-val { font-size: 12px; font-weight: 400; text-align: right; }
+    .agreement-pct { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--accent); }
+    .agreement-notice {
+      font-size: 11px; font-weight: 300; color: var(--sub); line-height: 1.85;
+      padding: 16px; border: 1px solid var(--rule); margin-top: 16px;
+    }
+    .agreement-notice strong { color: var(--text); font-weight: 400; }
+    .download-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid var(--rule);
+      font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--sub); background: none; border-top: 1px solid var(--rule);
+      cursor: pointer; width: 100%; margin-top: 16px; transition: color 0.15s;
+    }
+    .download-btn:hover { color: var(--text); }
+
+    /* ── FOOTER ── */
+    .crew-footer { padding: 32px 0 8px; text-align: center; }
+    .crew-footer-brand { font-family: var(--serif); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+
+    /* ── SENT SCREEN ── */
+    .sent-wrap { padding: 80px 0; text-align: center; }
+    .sent-title { font-family: var(--serif); font-size: 28px; margin-bottom: 12px; }
+    .sent-sub { font-size: 13px; font-weight: 300; color: var(--sub); line-height: 1.75; }
+    .sent-fallback { margin-top: 40px; padding: 20px; border: 1px solid var(--rule); }
+    .sent-fallback-label { font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dim); margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">Puna <span>Studio</span></div>
+    <button class="header-action" id="header-signout" style="display:none" onclick="signOut()">Sign out</button>
+  </div>
+
+  <!-- ═══ AUTH ═══ -->
+  <div class="screen active" id="screen-auth">
+    <div class="auth-wrap">
+      <div class="lbl" style="margin-bottom:12px">Crew Portal</div>
+      <div class="auth-title">Your work.<br>Your earnings.</div>
+      <div class="auth-sub" style="margin-top:12px">View your agreement, royalties, and public profile.</div>
+      <div class="field">
+        <label class="field-label" for="auth-email">Your email address</label>
+        <input class="field-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+        <div class="field-hint">We'll send you a link — no password needed.</div>
+      </div>
+      <button class="btn btn-primary" onclick="authSubmit()" id="auth-btn" style="margin-top:8px">Access my portal →</button>
+    </div>
+  </div>
+
+  <!-- ═══ SENT ═══ -->
+  <div class="screen" id="screen-sent">
+    <div class="sent-wrap">
+      <div class="lbl" style="margin-bottom:16px;display:block;text-align:center">Check your inbox</div>
+      <div class="sent-title">We sent you a link.</div>
+      <div class="sent-sub">Click the link in your email to view your portal.<br>It expires in 24 hours.</div>
+      <div class="sent-fallback">
+        <div class="sent-fallback-label">Email not arrived?</div>
+        <a id="direct-crew-link" href="#" style="display:inline-block;background:var(--raised);color:var(--text);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;text-decoration:none">Enter portal directly →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PORTAL ═══ -->
+  <div class="screen" id="screen-portal">
+
+    <!-- Profile -->
+    <div class="profile-block">
+      <div class="profile-avatar" id="profile-avatar">
+        <span class="profile-avatar-initials" id="profile-initials">—</span>
+      </div>
+      <div class="profile-name" id="profile-name">—</div>
+      <div class="profile-role" id="profile-roles">—</div>
+
+      <textarea class="profile-bio-input" id="profile-bio" rows="3" placeholder="A short bio — this appears on your public profile…"></textarea>
+
+      <div class="profile-links">
+        <input class="profile-link-input" type="url" id="profile-imdb" placeholder="IMDb link">
+        <input class="profile-link-input" type="url" id="profile-instagram" placeholder="Instagram">
+        <input class="profile-link-input" type="url" id="profile-website" placeholder="Website">
+      </div>
+
+      <button class="save-profile-btn" onclick="saveProfile()">Save profile →</button>
+
+      <div class="profile-share">
+        <div class="profile-share-url" id="profile-share-url">puna.nz/crew/—</div>
+        <button class="copy-btn" onclick="copyProfileLink()">Copy link</button>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="projects-block">
+      <div class="lbl" style="margin-bottom:16px">Projects</div>
+      <div id="crew-projects"></div>
+    </div>
+
+    <!-- Royalties -->
+    <div class="royalties-block">
+      <div class="lbl" style="margin-bottom:8px">Accrued Royalties</div>
+      <div class="royalty-total" id="royalty-total">$0</div>
+      <div class="royalty-sub" id="royalty-sub">Your earnings to date across all projects</div>
+
+      <div style="border-top:1px solid var(--rule);margin-top:8px" id="royalty-breakdown"></div>
+    </div>
+
+    <!-- Agreement(s) -->
+    <div class="agreement-block">
+      <div class="lbl" style="margin-bottom:20px">Agreements</div>
+      <div id="agreements-list"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="crew-footer">
+      <div class="crew-footer-brand">Puna</div>
+      <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">Rights management for independent creators in Aotearoa</div>
+    </div>
+
+  </div>
+
+  <!-- ═══ ERROR ═══ -->
+  <div class="screen" id="screen-error">
+    <div style="padding:80px 0;text-align:center">
+      <div class="sent-title" style="color:var(--sub)">Link not found.</div>
+      <div class="sent-sub">This link may have expired. Enter your email to get a new one.</div>
+      <div style="margin-top:32px">
+        <button class="btn btn-ghost" onclick="showScreen('screen-auth')" style="max-width:240px;margin:0 auto">Try again →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let crewData = null;
+
+  // ─── INIT ──────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
+    if (token) {
+      await verifyToken(token);
+      return;
+    }
+
+    const stored = localStorage.getItem('puna_crew_user');
+    if (stored) {
+      try {
+        crewData = JSON.parse(stored);
+        renderPortal();
+        showScreen('screen-portal');
+      } catch (_) {
+        showScreen('screen-auth');
+      }
+    } else {
+      showScreen('screen-auth');
+    }
+  });
+
+  // ─── AUTH ──────────────────────────────────────
+  async function authSubmit() {
+    const email = document.getElementById('auth-email').value.trim();
+    if (!email || !email.includes('@')) { document.getElementById('auth-email').focus(); return; }
+
+    const btn = document.getElementById('auth-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/crew-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.loginUrl) {
+        document.getElementById('direct-crew-link').href = data.loginUrl;
+      }
+      showScreen('screen-sent');
+    } catch (_) {
+      // Dev mode
+      crewData = mockCrewData(email);
+      localStorage.setItem('puna_crew_user', JSON.stringify(crewData));
+      renderPortal();
+      showScreen('screen-portal');
+    }
+  }
+
+  async function verifyToken(token) {
+    try {
+      const res = await fetch('/api/crew-auth?token=' + token);
+      const data = await res.json();
+      if (data.crew) {
+        crewData = data.crew;
+        localStorage.setItem('puna_crew_user', JSON.stringify(crewData));
+        window.history.replaceState({}, '', '/crew.html');
+        renderPortal();
+        showScreen('screen-portal');
+      } else {
+        showScreen('screen-error');
+      }
+    } catch (_) {
+      showScreen('screen-error');
+    }
+  }
+
+  function signOut() {
+    localStorage.removeItem('puna_crew_user');
+    crewData = null;
+    showScreen('screen-auth');
+    document.getElementById('header-signout').style.display = 'none';
+  }
+
+  // ─── RENDER PORTAL ────────────────────────────
+  function renderPortal() {
+    if (!crewData) return;
+
+    document.getElementById('header-signout').style.display = 'block';
+    document.title = 'Puna — ' + crewData.name;
+
+    // Profile
+    const initials = crewData.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('profile-initials').textContent = initials;
+    document.getElementById('profile-name').textContent = crewData.name;
+
+    const allRoles = [...new Set((crewData.agreements || []).map(a => a.role))].join(' · ');
+    document.getElementById('profile-roles').textContent = allRoles || crewData.role || '—';
+
+    const slug = crewData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    document.getElementById('profile-share-url').textContent = 'puna.nz/crew/' + slug;
+
+    if (crewData.bio) document.getElementById('profile-bio').value = crewData.bio;
+    if (crewData.imdb) document.getElementById('profile-imdb').value = crewData.imdb;
+    if (crewData.instagram) document.getElementById('profile-instagram').value = crewData.instagram;
+    if (crewData.website) document.getElementById('profile-website').value = crewData.website;
+
+    // Projects
+    const projectsEl = document.getElementById('crew-projects');
+    if (crewData.agreements?.length) {
+      projectsEl.innerHTML = crewData.agreements.map(a => `
+        <div class="project-pill">
+          <span class="project-pill-name">${a.project}</span>
+          <span class="project-pill-role">${a.role}</span>
+        </div>`).join('');
+    } else {
+      projectsEl.innerHTML = `<div style="font-size:12px;font-weight:300;color:var(--dim)">No projects yet.</div>`;
+    }
+
+    // Royalties
+    const totalEarned = (crewData.agreements || []).reduce((sum, a) => sum + (a.earned || 0), 0);
+    document.getElementById('royalty-total').textContent = '$' + totalEarned.toLocaleString('en-NZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const breakdownEl = document.getElementById('royalty-breakdown');
+    if (crewData.agreements?.length) {
+      breakdownEl.innerHTML = crewData.agreements.map(a => `
+        <div class="royalty-row">
+          <div>
+            <div class="royalty-label">${a.project}</div>
+            <div class="royalty-label-sub">${a.role} · ${a.pct}% of net sales</div>
+          </div>
+          <div class="royalty-val ${a.earned === 0 ? 'zero' : ''}">$${(a.earned || 0).toLocaleString('en-NZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        </div>`).join('');
+    } else {
+      breakdownEl.innerHTML = `<div style="padding:16px 0;font-size:12px;font-weight:300;color:var(--dim)">No earnings yet — royalties will appear here when sales are processed.</div>`;
+    }
+
+    // Agreements
+    const agreementsEl = document.getElementById('agreements-list');
+    if (crewData.agreements?.length) {
+      agreementsEl.innerHTML = crewData.agreements.map(a => `
+        <div class="agreement-card">
+          <div class="agreement-card-title">${a.project}</div>
+          <div class="agreement-row">
+            <div class="agreement-key">Project</div>
+            <div class="agreement-val">${a.project}</div>
+          </div>
+          <div class="agreement-row">
+            <div class="agreement-key">Role</div>
+            <div class="agreement-val">${a.role}</div>
+          </div>
+          <div class="agreement-row">
+            <div class="agreement-key">Pool</div>
+            <div class="agreement-val">${a.pool === 'key_team' ? 'Rōpū Matua · Key Team' : 'Kaimahi · Crew'}</div>
+          </div>
+          <div class="agreement-row">
+            <div class="agreement-key">Revenue share</div>
+            <div class="agreement-pct">${a.pct}%</div>
+          </div>
+          <div class="agreement-row">
+            <div class="agreement-key">Rights holder</div>
+            <div class="agreement-val">${a.rhName}</div>
+          </div>
+          <div class="agreement-row">
+            <div class="agreement-key">Signed as</div>
+            <div class="agreement-val">${a.signedName}</div>
+          </div>
+          <div class="agreement-row">
+            <div class="agreement-key">Date signed</div>
+            <div class="agreement-val">${new Date(a.signedAt).toLocaleDateString('en-NZ', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+          </div>
+        </div>
+        <div class="agreement-notice">
+          This agreement confirms your <strong>${a.pct}% revenue share</strong> from net sales of <strong>${a.project}</strong>.
+          It does not grant ownership of or rights to the intellectual property.
+          <strong>${a.rhName}</strong> retains full ownership at all times.
+        </div>
+        <button class="download-btn" onclick="downloadAgreement('${a.project}')">
+          <span>Download agreement PDF</span>
+          <span>↓</span>
+        </button>`).join('<div style="height:32px"></div>');
+    } else {
+      agreementsEl.innerHTML = `<div style="font-size:12px;font-weight:300;color:var(--dim)">No agreements yet.</div>`;
+    }
+  }
+
+  // ─── PROFILE SAVE ─────────────────────────────
+  async function saveProfile() {
+    const bio = document.getElementById('profile-bio').value.trim();
+    const imdb = document.getElementById('profile-imdb').value.trim();
+    const instagram = document.getElementById('profile-instagram').value.trim();
+    const website = document.getElementById('profile-website').value.trim();
+
+    crewData = { ...crewData, bio, imdb, instagram, website };
+    localStorage.setItem('puna_crew_user', JSON.stringify(crewData));
+
+    try {
+      await fetch('/api/crew-auth', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: crewData.email, bio, imdb, instagram, website })
+      });
+    } catch (_) {}
+
+    const btn = event.currentTarget;
+    btn.textContent = '✓ Saved';
+    setTimeout(() => btn.textContent = 'Save profile →', 2000);
+  }
+
+  function copyProfileLink() {
+    const slug = crewData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const url = 'https://puna.nz/crew/' + slug;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = event.currentTarget;
+      btn.textContent = 'Copied';
+      setTimeout(() => btn.textContent = 'Copy link', 1500);
+    });
+  }
+
+  function downloadAgreement(project) {
+    // TODO: generate PDF server-side — for now show toast
+    alert('PDF download — coming soon. Your agreement details are shown above.');
+  }
+
+  // ─── MOCK DATA (dev mode) ─────────────────────
+  function mockCrewData(email) {
+    return {
+      name: 'Hera Ngāta',
+      email,
+      role: 'Producer',
+      bio: '',
+      agreements: [{
+        project: 'Manaia',
+        role: 'Producer',
+        pool: 'key_team',
+        pct: 6,
+        rhName: 'Big River Creative Ltd',
+        signedName: 'Hera Ngāta',
+        signedAt: new Date().toISOString(),
+        earned: 0
+      }]
+    };
+  }
+
+  // ─── UTILS ────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>

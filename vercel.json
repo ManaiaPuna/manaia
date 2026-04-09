@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "crew.html", "use": "@vercel/static" },
+    { "src": "placeholder.mp4", "use": "@vercel/static" },
+    { "src": "series.mp4", "use": "@vercel/static" },
+    { "src": "creator.png", "use": "@vercel/static" },
+    { "src": "shop-tshirt.png", "use": "@vercel/static" },
+    { "src": "shop-vinyl.png", "use": "@vercel/static" },
+    { "src": "shop-script.png", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/notify", "dest": "/api/notify.js" },
+    { "src": "/api/send-update", "dest": "/api/send-update.js" },
+    { "src": "/api/studio-auth", "dest": "/api/studio-auth.js" },
+    { "src": "/api/studio-project", "dest": "/api/studio-project.js" },
+    { "src": "/api/studio-invite", "dest": "/api/studio-invite.js" },
+    { "src": "/api/accept", "dest": "/api/accept.js" },
+    { "src": "/api/crew-auth", "dest": "/api/crew-auth.js" },
+    { "src": "/studio", "dest": "/studio.html" },
+    { "src": "/crew", "dest": "/crew.html" },
+    { "src": "/crew.html", "dest": "/crew.html" },
+    { "src": "/accept", "dest": "/accept.html" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)\\.html", "dest": "/$1.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}

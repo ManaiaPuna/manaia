@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Puna Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111110;
+      --raised: #191918;
+      --rule: #252523;
+      --dim: #444442;
+      --sub: #666664;
+      --text: #E8E6E1;
+      --accent: #C9894A;
+      --sans: 'Roboto', sans-serif;
+      --serif: 'DM Serif Display', serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
+
+    /* ── LAYOUT ── */
+    .studio-wrap { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── HEADER ── */
+    .studio-header {
+      height: 52px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; border-bottom: 1px solid var(--rule); position: sticky; top: 0;
+      background: var(--bg); z-index: 100;
+    }
+    .studio-brand { font-family: var(--serif); font-size: 18px; letter-spacing: 3px; text-transform: uppercase; }
+    .studio-brand span { color: var(--accent); }
+    .studio-user { font-size: 11px; font-weight: 300; color: var(--sub); }
+
+    /* ── MAIN ── */
+    .studio-main { flex: 1; max-width: 680px; margin: 0 auto; width: 100%; padding: 0 24px 80px; }
+
+    /* ── SECTION LABEL ── */
+    .lbl {
+      font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--accent); display: block;
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── AUTH SCREEN ── */
+    .auth-hero { padding: 60px 0 40px; text-align: center; }
+    .auth-title { font-family: var(--serif); font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+    .auth-sub { font-size: 13px; font-weight: 300; color: var(--sub); line-height: 1.75; }
+    .auth-form { margin-top: 40px; }
+    .auth-disclaimer {
+      margin-top: 32px; padding: 20px; border: 1px solid var(--rule);
+      font-size: 11px; font-weight: 300; color: var(--sub); line-height: 1.75;
+    }
+    .auth-disclaimer strong { color: var(--text); font-weight: 500; }
+
+    /* ── FORM ELEMENTS ── */
+    .field { margin-bottom: 16px; }
+    .field-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--sub); display: block; margin-bottom: 8px; }
+    .field-input {
+      width: 100%; background: var(--raised); border: 1px solid var(--rule);
+      color: var(--text); font-family: var(--sans); font-size: 14px; font-weight: 300;
+      padding: 12px 14px; outline: none; transition: border-color 0.15s;
+      -webkit-appearance: none; border-radius: 0;
+    }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--dim); }
+    .field-hint { font-size: 10px; font-weight: 300; color: var(--sub); margin-top: 6px; line-height: 1.6; }
+    textarea.field-input { resize: vertical; min-height: 80px; line-height: 1.65; }
+    select.field-input { cursor: pointer; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: var(--sans); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 12px 24px; border: none; cursor: pointer;
+      transition: opacity 0.15s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--rule); }
+    .btn-danger { background: transparent; color: #E05C5C; border: 1px solid #3A2020; font-size: 10px; padding: 8px 14px; }
+    .btn-full { width: 100%; justify-content: center; }
+    .btn-sm { font-size: 10px; padding: 8px 16px; }
+
+    /* ── DASHBOARD ── */
+    .dash-header { padding: 36px 0 24px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+    .dash-title { font-family: var(--serif); font-size: 28px; margin-bottom: 4px; }
+    .dash-sub { font-size: 12px; font-weight: 300; color: var(--sub); }
+
+    .project-card {
+      padding: 20px 0; border-bottom: 1px solid var(--rule); cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .project-card:hover { opacity: 0.75; }
+    .project-card-title { font-family: var(--serif); font-size: 20px; margin-bottom: 4px; }
+    .project-card-meta { font-size: 11px; font-weight: 300; color: var(--sub); display: flex; gap: 16px; }
+    .project-card-status {
+      font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 3px 8px; border: 1px solid var(--rule); color: var(--sub);
+    }
+    .project-card-status.locked { color: var(--accent); border-color: var(--accent); }
+
+    .empty-state { padding: 48px 0; text-align: center; }
+    .empty-state-title { font-family: var(--serif); font-size: 20px; color: var(--sub); margin-bottom: 8px; }
+    .empty-state-sub { font-size: 12px; font-weight: 300; color: var(--dim); margin-bottom: 24px; }
+
+    /* ── NEW PROJECT ── */
+    .screen-header { padding: 32px 0 24px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+    .screen-title { font-family: var(--serif); font-size: 28px; margin-bottom: 4px; }
+    .screen-sub { font-size: 12px; font-weight: 300; color: var(--sub); }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--sub); background: none; border: none; cursor: pointer;
+      padding: 0; margin-bottom: 24px; margin-top: 24px; transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* ── SPLIT BUILDER ── */
+    .split-section { margin-bottom: 32px; }
+    .split-section-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+      margin-bottom: 0;
+    }
+    .split-section-title { font-family: var(--serif); font-size: 18px; }
+    .split-section-pct {
+      font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent);
+    }
+    .split-pct-input {
+      background: transparent; border: none; border-bottom: 1px solid var(--rule);
+      color: var(--accent); font-family: var(--mono); font-size: 22px; font-weight: 500;
+      width: 72px; text-align: right; outline: none; padding: 0 4px;
+    }
+    .split-pct-input:focus { border-bottom-color: var(--accent); }
+
+    .member-row {
+      display: grid; grid-template-columns: 1fr 1fr 140px 160px 80px 36px;
+      gap: 8px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule);
+    }
+    .member-row-head {
+      display: grid; grid-template-columns: 1fr 1fr 140px 160px 80px 36px;
+      gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--rule);
+    }
+    .member-col-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+    .member-input {
+      background: var(--raised); border: 1px solid var(--rule); color: var(--text);
+      font-family: var(--sans); font-size: 12px; font-weight: 300;
+      padding: 8px 10px; outline: none; width: 100%;
+    }
+    .member-input:focus { border-color: var(--accent); }
+    .member-input::placeholder { color: var(--dim); }
+    .member-pct {
+      font-family: var(--mono); font-size: 13px; font-weight: 500;
+      color: var(--text); text-align: right; padding-right: 4px;
+    }
+    .member-remove {
+      background: none; border: none; color: var(--dim); font-size: 14px;
+      cursor: pointer; padding: 4px; transition: color 0.15s; text-align: center;
+    }
+    .member-remove:hover { color: #E05C5C; }
+    .add-member-btn {
+      display: flex; align-items: center; gap: 6px; padding: 12px 0;
+      font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--sub); background: none; border: none; cursor: pointer;
+      transition: color 0.15s; border-bottom: 1px solid var(--rule);
+    }
+    .add-member-btn:hover { color: var(--text); }
+
+    /* ── SPLIT SUMMARY ── */
+    .split-summary {
+      padding: 16px; background: var(--raised); margin: 24px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .split-summary-label { font-size: 11px; font-weight: 300; color: var(--sub); }
+    .split-summary-total { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+    .split-summary-total.valid { color: #5CB85C; }
+    .split-summary-total.invalid { color: #E05C5C; }
+
+    /* ── PROJECT DETAIL ── */
+    .project-detail-header { padding: 32px 0 20px; }
+    .project-eyebrow { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .project-detail-title { font-family: var(--serif); font-size: 32px; margin-bottom: 4px; }
+    .project-detail-type { font-size: 12px; font-weight: 300; color: var(--sub); }
+
+    .detail-section { padding: 24px 0; border-bottom: 1px solid var(--rule); }
+    .detail-section-label { font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--sub); margin-bottom: 16px; }
+
+    .pool-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--rule);
+    }
+    .pool-row:last-child { border-bottom: none; }
+    .pool-name { font-size: 13px; font-weight: 400; }
+    .pool-pct { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--accent); }
+
+    .invite-row {
+      display: grid; grid-template-columns: 1fr 100px 80px;
+      gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule);
+    }
+    .invite-row-head {
+      display: grid; grid-template-columns: 1fr 100px 80px;
+      gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule);
+    }
+    .invite-status {
+      font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 3px 8px; text-align: center;
+    }
+    .invite-status.pending { background: var(--raised); color: var(--sub); }
+    .invite-status.accepted { background: #0F2A1A; color: #5CB85C; }
+    .invite-status.declined { background: #2A0F0F; color: #E05C5C; }
+
+    .lock-warning {
+      padding: 16px; border: 1px solid var(--accent); margin: 24px 0;
+      font-size: 12px; font-weight: 300; color: var(--sub); line-height: 1.75;
+    }
+    .lock-warning strong { color: var(--accent); font-weight: 500; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg); font-size: 12px; font-weight: 500;
+      padding: 10px 20px; letter-spacing: 0.3px; opacity: 0;
+      transition: opacity 0.2s; pointer-events: none; z-index: 999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── STEP INDICATOR ── */
+    .steps { display: flex; gap: 0; margin-bottom: 32px; }
+    .step {
+      flex: 1; padding: 10px 0; text-align: center;
+      font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--dim); border-bottom: 2px solid var(--rule); transition: all 0.2s;
+    }
+    .step.active { color: var(--text); border-bottom-color: var(--accent); }
+    .step.done { color: var(--sub); border-bottom-color: var(--sub); }
+
+    /* ── RIGHTS HOLDER BANNER ── */
+    .rh-banner {
+      padding: 16px; background: var(--raised); border-left: 3px solid var(--accent);
+      margin-bottom: 24px;
+    }
+    .rh-banner-title { font-size: 11px; font-weight: 500; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .rh-banner-body { font-size: 11px; font-weight: 300; color: var(--sub); line-height: 1.65; }
+  </style>
+</head>
+<body>
+<div class="studio-wrap">
+
+  <!-- HEADER -->
+  <header class="studio-header">
+    <div class="studio-brand">Puna <span>Studio</span></div>
+    <div class="studio-user" id="header-user"></div>
+  </header>
+
+  <main class="studio-main">
+
+    <!-- ═══ SCREEN: AUTH ═══ -->
+    <div class="screen active" id="screen-auth">
+      <div class="auth-hero">
+        <div class="lbl" style="margin-bottom:12px">Rights Holder Portal</div>
+        <div class="auth-title">Your work.<br>Your terms.</div>
+        <div class="auth-sub" style="margin-top:12px">Manage your project, set revenue splits,<br>and invite your team.</div>
+      </div>
+
+      <div class="auth-form">
+        <div class="field">
+          <label class="field-label" for="auth-name">Your name</label>
+          <input class="field-input" type="text" id="auth-name" placeholder="Te Māia Tūhoe" autocomplete="name">
+        </div>
+        <div class="field">
+          <label class="field-label" for="auth-email">Email address</label>
+          <input class="field-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+          <div class="field-hint">We'll send you a link to sign in — no password needed.</div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="authSubmit()" id="auth-btn" style="margin-top:8px">
+          Enter Studio →
+        </button>
+      </div>
+
+      <div class="auth-disclaimer" style="margin-top:40px">
+        <strong>Rights Holder access only.</strong> This portal is for the person or company that owns the intellectual property. By continuing you confirm you hold or represent the rights to the content you upload.
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: AUTH SENT ═══ -->
+    <div class="screen" id="screen-auth-sent">
+      <div style="padding:80px 0;text-align:center">
+        <div class="lbl" style="margin-bottom:16px;display:block;text-align:center">Check your inbox</div>
+        <div class="auth-title" style="font-size:28px">We sent you a link.</div>
+        <div class="auth-sub" style="margin-top:12px">Click the link in your email to enter the studio.<br>It expires in 24 hours.</div>
+        <div style="margin-top:40px;padding:20px;border:1px solid var(--rule)">
+          <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:12px">Email not arrived?</div>
+          <a id="direct-login-link" href="#" style="display:inline-block;background:var(--raised);color:var(--text);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;text-decoration:none">Enter Studio directly →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: DASHBOARD ═══ -->
+    <div class="screen" id="screen-dashboard">
+
+      <!-- Greeting -->
+      <div style="padding:32px 0 24px;border-bottom:1px solid var(--rule)">
+        <div class="lbl" style="margin-bottom:8px">Rights Holder Dashboard</div>
+        <div class="dash-title" id="dash-greeting">Kia ora.</div>
+      </div>
+
+      <!-- Revenue summary -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);margin:24px 0;border:1px solid var(--rule)">
+        <div style="background:var(--bg);padding:20px 16px">
+          <div class="lbl" style="margin-bottom:10px">Total Revenue</div>
+          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-revenue">$0</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">net sales to date</div>
+        </div>
+        <div style="background:var(--bg);padding:20px 16px">
+          <div class="lbl" style="margin-bottom:10px">Your Cut</div>
+          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--accent)" id="stat-cut">$0</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px" id="stat-cut-pct">at —%</div>
+        </div>
+        <div style="background:var(--bg);padding:20px 16px">
+          <div class="lbl" style="margin-bottom:10px">Tickets Sold</div>
+          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-tickets">0</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px" id="stat-tickets-rem">— remaining</div>
+        </div>
+        <div style="background:var(--bg);padding:20px 16px">
+          <div class="lbl" style="margin-bottom:10px">Shop Sales</div>
+          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text)" id="stat-shop">$0</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">0 units sold</div>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div class="lbl">Projects</div>
+        <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-new-project')">+ New</button>
+      </div>
+      <div id="project-list"></div>
+
+      <!-- Team status -->
+      <div style="margin-top:32px;margin-bottom:8px">
+        <div class="lbl" style="margin-bottom:16px">Team Status</div>
+        <div id="team-status-list"></div>
+      </div>
+
+      <!-- Shop -->
+      <div style="margin-top:32px">
+        <div class="lbl" style="margin-bottom:16px">Hoko | Shop</div>
+        <div style="border-top:1px solid var(--rule)">
+          <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim)">Item</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Sold</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-align:right">Revenue</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:13px;font-weight:400">Series 1 Art Print</div>
+            <div style="font-family:var(--mono);font-size:13px;text-align:right;color:var(--sub)">0 / 50</div>
+            <div style="font-family:var(--mono);font-size:13px;text-align:right">$0</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:13px;font-weight:400">Original Score</div>
+            <div style="font-family:var(--mono);font-size:13px;text-align:right;color:var(--sub)">0 / 50</div>
+            <div style="font-family:var(--mono);font-size:13px;text-align:right">$0</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 60px 60px;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)">
+            <div style="font-size:13px;font-weight:400">EP.01 Shooting Script</div>
+            <div style="font-family:var(--mono);font-size:13px;text-align:right;color:var(--sub)">0 / 50</div>
+            <div style="font-family:var(--mono);font-size:13px;text-align:right">$0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscribers -->
+      <div style="margin-top:32px;padding:20px;background:var(--raised);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="lbl" style="margin-bottom:6px">Subscribers</div>
+          <div style="font-family:var(--mono);font-size:24px;font-weight:500" id="stat-subs">—</div>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);margin-top:4px">on the notify list</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="alert('Send update — coming soon')">Send Update →</button>
+      </div>
+
+    </div>
+
+    <!-- ═══ SCREEN: NEW PROJECT ═══ -->
+    <div class="screen" id="screen-new-project">
+      <button class="back-btn" onclick="showScreen('screen-dashboard')">← Back</button>
+
+      <div class="steps">
+        <div class="step active" id="step-1">1 · Details</div>
+        <div class="step" id="step-2">2 · Splits</div>
+        <div class="step" id="step-3">3 · Review</div>
+      </div>
+
+      <!-- Step 1: Details -->
+      <div id="new-step-1">
+        <div class="screen-header">
+          <div class="screen-title">Project Details</div>
+          <div class="screen-sub">Tell us about the property.</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="proj-title">Project title</label>
+          <input class="field-input" type="text" id="proj-title" placeholder="Manaia">
+        </div>
+        <div class="field">
+          <label class="field-label" for="proj-type">Type</label>
+          <select class="field-input" id="proj-type">
+            <option value="series">Series</option>
+            <option value="film">Film</option>
+            <option value="documentary">Documentary</option>
+            <option value="short">Short Film</option>
+            <option value="music">Music</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="proj-desc">Brief description</label>
+          <textarea class="field-input" id="proj-desc" placeholder="A Māori detective in contemporary Auckland..."></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label" for="proj-rh-name">Rights holder name</label>
+          <input class="field-input" type="text" id="proj-rh-name" placeholder="Big River Creative Ltd">
+          <div class="field-hint">The person or company that legally owns this IP.</div>
+        </div>
+
+        <div class="rh-banner" style="margin-top:24px">
+          <div class="rh-banner-title">Ownership is yours. Always.</div>
+          <div class="rh-banner-body">Inviting crew to this project does not transfer any rights or ownership. You retain full intellectual property rights. Revenue shares are a reward for contribution — not a stake in the property.</div>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="newProjectStep(2)" style="margin-top:8px">Continue →</button>
+      </div>
+
+      <!-- Step 2: Splits -->
+      <div id="new-step-2" style="display:none">
+        <div class="screen-header">
+          <div class="screen-title">Revenue Splits</div>
+          <div class="screen-sub">Set how net sales are distributed. Must total 100%.</div>
+        </div>
+
+        <!-- Rights Holder share -->
+        <div class="split-section">
+          <div class="split-section-header">
+            <div>
+              <div class="split-section-title">Rights Holder</div>
+              <div style="font-size:11px;font-weight:300;color:var(--sub);margin-top:3px" id="rh-name-label">You</div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:4px">
+              <input class="split-pct-input" type="number" id="rh-pct" value="60" min="0" max="100" oninput="recalcSplits()">
+              <span style="font-family:var(--mono);font-size:14px;color:var(--sub)">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Team pool -->
+        <div class="split-section" style="margin-top:28px">
+          <div class="split-section-header">
+            <div>
+              <div class="split-section-title">Rōpū Matua · Key Team</div>
+              <div style="font-size:11px;font-weight:300;color:var(--sub);margin-top:3px">Director, Producer, Writer, DP, Composer</div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:4px">
+              <input class="split-pct-input" type="number" id="kt-pool-pct" value="30" min="0" max="100" oninput="recalcSplits()">
+              <span style="font-family:var(--mono);font-size:14px;color:var(--sub)">%</span>
+            </div>
+          </div>
+          <div id="kt-members"></div>
+          <button class="add-member-btn" onclick="addMember('kt')">+ Add Key Team member</button>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);padding:8px 0">You can add members now or after creating the project.</div>
+        </div>
+
+        <!-- Crew pool -->
+        <div class="split-section" style="margin-top:28px">
+          <div class="split-section-header">
+            <div>
+              <div class="split-section-title">Kaimahi · Crew</div>
+              <div style="font-size:11px;font-weight:300;color:var(--sub);margin-top:3px">All other contributors</div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:4px">
+              <input class="split-pct-input" type="number" id="crew-pool-pct" value="10" min="0" max="100" oninput="recalcSplits()">
+              <span style="font-family:var(--mono);font-size:14px;color:var(--sub)">%</span>
+            </div>
+          </div>
+          <div id="crew-members"></div>
+          <button class="add-member-btn" onclick="addMember('crew')">+ Add Crew member</button>
+          <div style="font-size:10px;font-weight:300;color:var(--dim);padding:8px 0">You can add members now or after creating the project.</div>
+        </div>
+
+        <!-- Total check -->
+        <div class="split-summary">
+          <div class="split-summary-label">Total allocated</div>
+          <div class="split-summary-total" id="split-total">100%</div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button class="btn btn-ghost" onclick="newProjectStep(1)" style="flex:1;justify-content:center">← Back</button>
+          <button class="btn btn-primary" onclick="newProjectStep(3)" style="flex:2;justify-content:center" id="splits-next-btn">Review →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Review -->
+      <div id="new-step-3" style="display:none">
+        <div class="screen-header">
+          <div class="screen-title">Review & Create</div>
+          <div class="screen-sub">Check everything before creating the project.</div>
+        </div>
+
+        <div id="review-content"></div>
+
+        <div class="lock-warning">
+          <strong>Once you create this project</strong>, you can still add crew before locking. When you lock the project, splits are fixed and no further changes can be made. Invitations will be sent only when you choose.
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button class="btn btn-ghost" onclick="newProjectStep(2)" style="flex:1;justify-content:center">← Back</button>
+          <button class="btn btn-primary" onclick="createProject()" style="flex:2;justify-content:center" id="create-btn">Create Project →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: PROJECT DETAIL ═══ -->
+    <div class="screen" id="screen-project-detail">
+      <button class="back-btn" onclick="showScreen('screen-dashboard')">← All Projects</button>
+
+      <div class="project-detail-header" id="detail-header"></div>
+
+      <!-- Splits overview -->
+      <div class="detail-section">
+        <div class="detail-section-label">Revenue Splits</div>
+        <div id="detail-splits"></div>
+      </div>
+
+      <!-- Team -->
+      <div class="detail-section">
+        <div class="detail-section-label">Rōpū Matua · Key Team</div>
+        <div id="detail-kt-head" class="invite-row-head">
+          <div class="member-col-label">Member</div>
+          <div class="member-col-label">Role</div>
+          <div class="member-col-label" style="text-align:right">Status</div>
+        </div>
+        <div id="detail-kt"></div>
+        <button class="add-member-btn" onclick="addInviteRow('kt')" id="add-kt-btn">+ Add Key Team member</button>
+      </div>
+
+      <!-- Crew -->
+      <div class="detail-section">
+        <div class="detail-section-label">Kaimahi · Crew</div>
+        <div id="detail-crew-head" class="invite-row-head">
+          <div class="member-col-label">Member</div>
+          <div class="member-col-label">Role</div>
+          <div class="member-col-label" style="text-align:right">Status</div>
+        </div>
+        <div id="detail-crew"></div>
+        <button class="add-member-btn" onclick="addInviteRow('crew')" id="add-crew-btn">+ Add Crew member</button>
+      </div>
+
+      <!-- Actions -->
+      <div style="padding:28px 0 8px;display:flex;flex-direction:column;gap:12px" id="detail-actions"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── STATE ────────────────────────────────────────
+  const state = {
+    user: null,
+    projects: [],
+    currentProject: null,
+    newProject: {
+      title: '', type: 'series', description: '', rhName: '',
+      rhPct: 60, ktPct: 30, crewPct: 10,
+      ktMembers: [], crewMembers: []
+    }
+  };
+
+  // ─── INIT ─────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    // Check for magic link token in URL
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      verifyToken(token);
+      return;
+    }
+
+    // Check stored session
+    const stored = localStorage.getItem('puna_studio_user');
+    if (stored) {
+      try {
+        state.user = JSON.parse(stored);
+        enterDashboard();
+      } catch (_) {
+        showScreen('screen-auth');
+      }
+    } else {
+      showScreen('screen-auth');
+    }
+  });
+
+  // ─── AUTH ─────────────────────────────────────────
+  async function authSubmit() {
+    const name = document.getElementById('auth-name').value.trim();
+    const email = document.getElementById('auth-email').value.trim();
+    if (!name) { document.getElementById('auth-name').focus(); return; }
+    if (!email || !email.includes('@')) { document.getElementById('auth-email').focus(); return; }
+
+    const btn = document.getElementById('auth-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/studio-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.loginUrl) {
+          document.getElementById('direct-login-link').href = data.loginUrl;
+        }
+        showScreen('screen-auth-sent');
+      } else {
+        showToast('Something went wrong — try again.');
+        btn.textContent = 'Enter Studio →';
+        btn.disabled = false;
+      }
+    } catch (_) {
+      // Dev mode: bypass auth
+      state.user = { name, email, id: 'dev-' + Date.now() };
+      localStorage.setItem('puna_studio_user', JSON.stringify(state.user));
+      enterDashboard();
+    }
+  }
+
+  async function verifyToken(token) {
+    try {
+      const res = await fetch('/api/studio-auth?token=' + token);
+      const data = await res.json();
+      if (data.user) {
+        state.user = data.user;
+        localStorage.setItem('puna_studio_user', JSON.stringify(state.user));
+        window.history.replaceState({}, '', '/studio.html');
+        enterDashboard();
+      } else {
+        showScreen('screen-auth');
+        showToast('Link expired — please sign in again.');
+      }
+    } catch (_) {
+      showScreen('screen-auth');
+    }
+  }
+
+  // ─── DASHBOARD ────────────────────────────────────
+  function enterDashboard() {
+    document.getElementById('header-user').textContent = state.user.name || state.user.email;
+    document.getElementById('dash-greeting').textContent = 'Kia ora, ' + (state.user.name?.split(' ')[0] || 'there') + '.';
+    loadProjects();
+    showScreen('screen-dashboard');
+  }
+
+  async function loadProjects() {
+    const list = document.getElementById('project-list');
+
+    try {
+      const res = await fetch('/api/studio-project?userId=' + state.user.id);
+      const data = await res.json();
+      state.projects = data.projects || [];
+    } catch (_) {
+      // Dev mode: use local state
+      state.projects = JSON.parse(localStorage.getItem('puna_projects') || '[]');
+    }
+
+    // ── STATS (mock — replace with live Stripe + Stream data) ──
+    const MOCK = { revenue: 0, rhPct: 60, tickets: 0, ticketsTotal: 2500, shop: 0, subs: 0 };
+    document.getElementById('stat-revenue').textContent = '$' + MOCK.revenue.toLocaleString();
+    document.getElementById('stat-cut').textContent = '$' + Math.round(MOCK.revenue * MOCK.rhPct / 100).toLocaleString();
+    document.getElementById('stat-cut-pct').textContent = 'at ' + MOCK.rhPct + '%';
+    document.getElementById('stat-tickets').textContent = MOCK.tickets.toLocaleString();
+    document.getElementById('stat-tickets-rem').textContent = (MOCK.ticketsTotal - MOCK.tickets).toLocaleString() + ' remaining';
+    document.getElementById('stat-shop').textContent = '$' + MOCK.shop.toLocaleString();
+    document.getElementById('stat-subs').textContent = MOCK.subs.toLocaleString();
+
+    if (state.projects.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-title">No projects yet.</div>
+          <div class="empty-state-sub">Create your first project to get started.</div>
+        </div>`;
+      renderTeamStatus([]);
+      return;
+    }
+
+    list.innerHTML = state.projects.map((p, i) => `
+      <div class="project-card" onclick="openProject(${i})">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <div class="project-card-title">${p.title}</div>
+            <div class="project-card-meta">
+              <span>${p.type}</span>
+              <span>${(p.ktMembers?.length || 0) + (p.crewMembers?.length || 0)} members</span>
+            </div>
+          </div>
+          <div class="project-card-status ${p.locked ? 'locked' : ''}">${p.locked ? 'Locked' : 'Open'}</div>
+        </div>
+      </div>`).join('');
+
+    const allMembers = state.projects.flatMap(p => [
+      ...(p.ktMembers || []).map(m => ({ ...m, project: p.title })),
+      ...(p.crewMembers || []).map(m => ({ ...m, project: p.title }))
+    ]);
+    renderTeamStatus(allMembers);
+  }
+
+  function renderTeamStatus(members) {
+    const el = document.getElementById('team-status-list');
+    if (!members.length) {
+      el.innerHTML = `<div style="font-size:12px;font-weight:300;color:var(--dim);padding:14px 0">No team members yet.</div>`;
+      return;
+    }
+    const accepted = members.filter(m => m.status === 'accepted').length;
+    const pending = members.filter(m => m.status === 'pending').length;
+    el.innerHTML = `
+      <div style="display:flex;gap:24px;margin-bottom:16px">
+        <div>
+          <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:#5CB85C">${accepted}</div>
+          <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-top:4px">Accepted</div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:var(--sub)">${pending}</div>
+          <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-top:4px">Pending</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--rule)">
+        ${members.slice(0, 6).map(m => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--rule)">
+            <div>
+              <div style="font-size:13px;font-weight:400">${m.name || '—'}</div>
+              <div style="font-size:10px;font-weight:300;color:var(--sub)">${m.role || ''} · ${m.project}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--accent)">${m.pct}%</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="width:8px;height:8px;border-radius:50%;background:${m.status === 'accepted' ? '#5CB85C' : m.status === 'declined' ? '#E05C5C' : 'var(--dim)'}"></div>
+                <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:${m.status === 'accepted' ? '#5CB85C' : m.status === 'declined' ? '#E05C5C' : 'var(--sub)'}">${m.status}</div>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function openProject(index) {
+    state.currentProject = state.projects[index];
+    renderProjectDetail();
+    showScreen('screen-project-detail');
+  }
+
+  // ─── NEW PROJECT ──────────────────────────────────
+  function newProjectStep(step) {
+    // Validate current step
+    if (step === 2) {
+      const title = document.getElementById('proj-title').value.trim();
+      const rhName = document.getElementById('proj-rh-name').value.trim();
+      if (!title) { document.getElementById('proj-title').focus(); showToast('Enter a project title.'); return; }
+      if (!rhName) { document.getElementById('proj-rh-name').focus(); showToast('Enter the rights holder name.'); return; }
+      state.newProject.title = title;
+      state.newProject.type = document.getElementById('proj-type').value;
+      state.newProject.description = document.getElementById('proj-desc').value.trim();
+      state.newProject.rhName = rhName;
+      document.getElementById('rh-name-label').textContent = rhName;
+      renderMembersFromState();
+    }
+    if (step === 3) {
+      const total = getSplitTotal();
+      if (Math.abs(total - 100) > 0.01) {
+        showToast('Splits must total exactly 100%.');
+        return;
+      }
+      saveSplitsFromDOM();
+      renderReview();
+    }
+
+    // Show/hide step panels
+    document.getElementById('new-step-1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('new-step-2').style.display = step === 2 ? 'block' : 'none';
+    document.getElementById('new-step-3').style.display = step === 3 ? 'block' : 'none';
+
+    // Update step indicators
+    [1,2,3].forEach(s => {
+      const el = document.getElementById('step-' + s);
+      el.className = 'step' + (s === step ? ' active' : s < step ? ' done' : '');
+    });
+  }
+
+  function renderMembersFromState() {
+    recalcSplits();
+  }
+
+  function addMember(pool) {
+    const container = document.getElementById(pool === 'kt' ? 'kt-members' : 'crew-members');
+    const id = Date.now() + Math.random();
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    row.dataset.id = id;
+    const listId = pool === 'kt' ? 'roles-kt' : 'roles-crew';
+    row.innerHTML = `
+      <input class="member-input" type="text" placeholder="First name" data-field="first_name">
+      <input class="member-input" type="text" placeholder="Last name" data-field="last_name">
+      <input class="member-input" type="text" placeholder="Role" data-field="role" list="${listId}">
+      <input class="member-input" type="email" placeholder="Email" data-field="email">
+      <div class="member-pct" data-pct></div>
+      <button class="member-remove" onclick="removeMember(this, '${pool}')">×</button>`;
+    container.appendChild(row);
+    recalcSplits();
+  }
+
+  function removeMember(btn, pool) {
+    btn.closest('.member-row').remove();
+    recalcSplits();
+  }
+
+  function recalcSplits() {
+    const rhPct = parseFloat(document.getElementById('rh-pct').value) || 0;
+    const ktPct = parseFloat(document.getElementById('kt-pool-pct').value) || 0;
+    const crewPct = parseFloat(document.getElementById('crew-pool-pct').value) || 0;
+
+    // Distribute evenly within each pool
+    const ktRows = document.querySelectorAll('#kt-members .member-row');
+    const crewRows = document.querySelectorAll('#crew-members .member-row');
+
+    const ktShare = ktRows.length > 0 ? +(ktPct / ktRows.length).toFixed(2) : 0;
+    const crewShare = crewRows.length > 0 ? +(crewPct / crewRows.length).toFixed(2) : 0;
+
+    ktRows.forEach(r => r.querySelector('[data-pct]').textContent = ktShare + '%');
+    crewRows.forEach(r => r.querySelector('[data-pct]').textContent = crewShare + '%');
+
+    const total = rhPct + ktPct + crewPct;
+    const totalEl = document.getElementById('split-total');
+    totalEl.textContent = total.toFixed(total % 1 === 0 ? 0 : 2) + '%';
+    totalEl.className = 'split-summary-total ' + (Math.abs(total - 100) < 0.01 ? 'valid' : 'invalid');
+  }
+
+  function getSplitTotal() {
+    const rh = parseFloat(document.getElementById('rh-pct').value) || 0;
+    const kt = parseFloat(document.getElementById('kt-pool-pct').value) || 0;
+    const crew = parseFloat(document.getElementById('crew-pool-pct').value) || 0;
+    return rh + kt + crew;
+  }
+
+  function saveSplitsFromDOM() {
+    state.newProject.rhPct = parseFloat(document.getElementById('rh-pct').value) || 0;
+    state.newProject.ktPct = parseFloat(document.getElementById('kt-pool-pct').value) || 0;
+    state.newProject.crewPct = parseFloat(document.getElementById('crew-pool-pct').value) || 0;
+
+    state.newProject.ktMembers = [];
+    document.querySelectorAll('#kt-members .member-row').forEach(row => {
+      const first = row.querySelector('[data-field="first_name"]').value.trim();
+      const last = row.querySelector('[data-field="last_name"]').value.trim();
+      const name = [first, last].filter(Boolean).join(' ');
+      const role = row.querySelector('[data-field="role"]').value.trim();
+      const email = row.querySelector('[data-field="email"]').value.trim();
+      const pct = parseFloat(row.querySelector('[data-pct]').textContent) || 0;
+      if (first || last || role) state.newProject.ktMembers.push({ name, first, last, role, email, pct, status: 'pending' });
+    });
+
+    state.newProject.crewMembers = [];
+    document.querySelectorAll('#crew-members .member-row').forEach(row => {
+      const first = row.querySelector('[data-field="first_name"]').value.trim();
+      const last = row.querySelector('[data-field="last_name"]').value.trim();
+      const name = [first, last].filter(Boolean).join(' ');
+      const role = row.querySelector('[data-field="role"]').value.trim();
+      const email = row.querySelector('[data-field="email"]').value.trim();
+      const pct = parseFloat(row.querySelector('[data-pct]').textContent) || 0;
+      if (first || last || role) state.newProject.crewMembers.push({ name, first, last, role, email, pct, status: 'pending' });
+    });
+  }
+
+  function renderReview() {
+    const p = state.newProject;
+    document.getElementById('review-content').innerHTML = `
+      <div style="padding:20px 0;border-bottom:1px solid var(--rule)">
+        <div class="lbl" style="margin-bottom:8px">Project</div>
+        <div style="font-family:var(--serif);font-size:22px">${p.title}</div>
+        <div style="font-size:12px;font-weight:300;color:var(--sub);margin-top:4px">${p.type} · ${p.rhName}</div>
+      </div>
+      <div style="padding:20px 0;border-bottom:1px solid var(--rule)">
+        <div class="lbl" style="margin-bottom:12px">Revenue Splits</div>
+        <div class="pool-row"><div class="pool-name">${p.rhName} (Rights Holder)</div><div class="pool-pct">${p.rhPct}%</div></div>
+        <div class="pool-row"><div class="pool-name">Rōpū Matua · Key Team (${p.ktMembers.length} members)</div><div class="pool-pct">${p.ktPct}%</div></div>
+        <div class="pool-row"><div class="pool-name">Kaimahi · Crew (${p.crewMembers.length} members)</div><div class="pool-pct">${p.crewPct}%</div></div>
+      </div>
+      ${p.ktMembers.length > 0 ? `
+      <div style="padding:20px 0;border-bottom:1px solid var(--rule)">
+        <div class="lbl" style="margin-bottom:12px">Key Team</div>
+        ${p.ktMembers.map(m => `<div class="pool-row"><div class="pool-name">${m.name || '—'} <span style="color:var(--sub);font-size:11px">${m.role}</span></div><div class="pool-pct">${m.pct}%</div></div>`).join('')}
+      </div>` : ''}
+      ${p.crewMembers.length > 0 ? `
+      <div style="padding:20px 0;border-bottom:1px solid var(--rule)">
+        <div class="lbl" style="margin-bottom:12px">Crew</div>
+        ${p.crewMembers.map(m => `<div class="pool-row"><div class="pool-name">${m.name || '—'} <span style="color:var(--sub);font-size:11px">${m.role}</span></div><div class="pool-pct">${m.pct}%</div></div>`).join('')}
+      </div>` : ''}`;
+  }
+
+  async function createProject() {
+    const btn = document.getElementById('create-btn');
+    btn.textContent = 'Creating…';
+    btn.disabled = true;
+
+    const project = {
+      ...state.newProject,
+      id: 'proj-' + Date.now(),
+      ownerId: state.user.id,
+      locked: false,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      await fetch('/api/studio-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project, userId: state.user.id })
+      });
+    } catch (_) {
+      // Dev mode: save locally
+    }
+
+    // Save locally regardless
+    state.projects.push(project);
+    localStorage.setItem('puna_projects', JSON.stringify(state.projects));
+
+    showToast('Project created.');
+    state.currentProject = project;
+    renderProjectDetail();
+    showScreen('screen-project-detail');
+  }
+
+  // ─── PROJECT DETAIL ───────────────────────────────
+  function renderProjectDetail() {
+    const p = state.currentProject;
+
+    document.getElementById('detail-header').innerHTML = `
+      <div class="project-eyebrow">${p.type}</div>
+      <div class="project-detail-title">${p.title}</div>
+      <div class="project-detail-type">${p.rhName} · ${p.locked ? '🔒 Locked' : 'Open'}</div>`;
+
+    document.getElementById('detail-splits').innerHTML = `
+      <div class="pool-row"><div class="pool-name">Rights Holder</div><div class="pool-pct">${p.rhPct}%</div></div>
+      <div class="pool-row"><div class="pool-name">Rōpū Matua · Key Team</div><div class="pool-pct">${p.ktPct}%</div></div>
+      <div class="pool-row"><div class="pool-name">Kaimahi · Crew</div><div class="pool-pct">${p.crewPct}%</div></div>`;
+
+    renderInviteList('kt', p.ktMembers || []);
+    renderInviteList('crew', p.crewMembers || []);
+
+    const actions = document.getElementById('detail-actions');
+    if (!p.locked) {
+      actions.innerHTML = `
+        <button class="btn btn-primary btn-full" onclick="sendAllInvites()">Send Invitations →</button>
+        <button class="btn btn-ghost btn-full" onclick="lockProject()">Lock Project — fix splits</button>`;
+    } else {
+      actions.innerHTML = `
+        <div style="font-size:11px;font-weight:300;color:var(--sub);text-align:center;padding:8px 0">
+          This project is locked. Splits are fixed.
+        </div>`;
+    }
+
+    const addKt = document.getElementById('add-kt-btn');
+    const addCrew = document.getElementById('add-crew-btn');
+    if (addKt) addKt.style.display = p.locked ? 'none' : 'flex';
+    if (addCrew) addCrew.style.display = p.locked ? 'none' : 'flex';
+  }
+
+  function renderInviteList(pool, members) {
+    const container = document.getElementById('detail-' + pool);
+    if (members.length === 0) {
+      container.innerHTML = `<div style="padding:14px 0;font-size:12px;font-weight:300;color:var(--dim)">No members added yet.</div>`;
+      return;
+    }
+    container.innerHTML = members.map((m, i) => `
+      <div class="invite-row">
+        <div>
+          <div style="font-size:13px;font-weight:400">${m.name || '—'}</div>
+          <div style="font-size:11px;font-weight:300;color:var(--sub)">${m.email || 'No email yet'}</div>
+        </div>
+        <div style="font-size:11px;font-weight:300;color:var(--sub)">${m.role || '—'} · ${m.pct}%</div>
+        <div class="invite-status ${m.status}">${m.status}</div>
+      </div>`).join('');
+  }
+
+  function addInviteRow(pool) {
+    const p = state.currentProject;
+    const members = pool === 'kt' ? p.ktMembers : p.crewMembers;
+    const name = prompt('Name:');
+    if (!name) return;
+    const role = prompt('Role:');
+    const email = prompt('Email (to send invitation):');
+    const poolPct = pool === 'kt' ? p.ktPct : p.crewPct;
+    const newCount = members.length + 1;
+    const evenShare = +(poolPct / newCount).toFixed(2);
+    members.forEach(m => m.pct = evenShare);
+    members.push({ name, role: role || '', email: email || '', pct: evenShare, status: 'pending' });
+    saveCurrentProject();
+    renderProjectDetail();
+    showToast(name + ' added.');
+  }
+
+  async function sendAllInvites() {
+    const p = state.currentProject;
+    const btn = event.currentTarget;
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+
+    const allMembers = [
+      ...p.ktMembers.filter(m => m.email && m.status === 'pending').map(m => ({ ...m, pool: 'key_team' })),
+      ...p.crewMembers.filter(m => m.email && m.status === 'pending').map(m => ({ ...m, pool: 'crew' }))
+    ];
+
+    if (allMembers.length === 0) {
+      showToast('No pending invitations to send.');
+      btn.textContent = 'Send Invitations →';
+      btn.disabled = false;
+      return;
+    }
+
+    try {
+      await fetch('/api/studio-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project: { id: p.id, title: p.title, type: p.type, rhName: p.rhName },
+          members: allMembers,
+          senderName: state.user.name
+        })
+      });
+      showToast(allMembers.length + ' invitation' + (allMembers.length > 1 ? 's' : '') + ' sent.');
+    } catch (_) {
+      showToast('Invitations sent (dev mode).');
+    }
+
+    btn.textContent = 'Send Invitations →';
+    btn.disabled = false;
+  }
+
+  function lockProject() {
+    if (!confirm('Lock this project? Splits cannot be changed after locking.')) return;
+    state.currentProject.locked = true;
+    saveCurrentProject();
+    renderProjectDetail();
+    showToast('Project locked.');
+  }
+
+  function saveCurrentProject() {
+    const idx = state.projects.findIndex(p => p.id === state.currentProject.id);
+    if (idx >= 0) state.projects[idx] = state.currentProject;
+    localStorage.setItem('puna_projects', JSON.stringify(state.projects));
+  }
+
+  function renderMemberList(pool) {}
+
+  // ─── UTILS ────────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+
+<!-- Role suggestions — Key Team -->
+<datalist id="roles-kt">
+  <option value="Writer / Director">
+  <option value="Writer">
+  <option value="Director">
+  <option value="Writer / Director / Producer">
+  <option value="Producer">
+  <option value="Executive Producer">
+  <option value="Line Producer">
+  <option value="Director of Photography">
+  <option value="Director of Photography / Camera Operator">
+  <option value="Composer">
+  <option value="Co-writer">
+  <option value="Tohunga Te Reo Māori">
+  <option value="Tohunga Tikanga Māori">
+  <option value="Tohunga Whakaaro">
+  <option value="Kaiwhakaako — Acting Coach">
+  <option value="Casting Director">
+  <option value="Other">
+</datalist>
+
+<!-- Role suggestions — Crew -->
+<datalist id="roles-crew">
+  <option value="Editor">
+  <option value="Sound Recordist">
+  <option value="Sound Designer">
+  <option value="Sound Recordist / Sound Designer">
+  <option value="Colour Grader">
+  <option value="Camera Operator">
+  <option value="Gaffer">
+  <option value="Grip">
+  <option value="Production Designer">
+  <option value="Art Director">
+  <option value="Costume Designer">
+  <option value="Makeup Artist">
+  <option value="Script Supervisor">
+  <option value="Stunt Coordinator">
+  <option value="Visual Effects">
+  <option value="Tohunga Te Reo Māori">
+  <option value="Tohunga Tikanga Māori">
+  <option value="Reo Māori Advisor">
+  <option value="Tohunga Whakairo — Carver">
+  <option value="Tohunga Tā Moko">
+  <option value="Kaitiaki Taonga Pūoro">
+  <option value="Production Assistant">
+  <option value="Runner">
+  <option value="Other">
+</datalist>
+</body>
+</html>
