@@ -1089,6 +1089,7 @@
       <button class="tab-btn" onclick="switchTab('series')" id="tab-series" aria-selected="false">Series</button>
       <button class="tab-btn" onclick="switchTab('episodes')" id="tab-episodes" aria-selected="false">Episodes</button>
       <div class="dot-live" aria-hidden="true"></div>
+      <a href="/studio" style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--sub);text-decoration:none;padding:4px 0 4px 12px;border-left:1px solid var(--rule);margin-left:8px;opacity:0.7">Stūdio</a>
     </div>
   </div>
 </header>
@@ -1100,9 +1101,9 @@
   <div class="poster" role="img" aria-label="Manaia — key art" id="poster">
     <video class="poster-video" id="poster-video"
       autoplay muted loop playsinline webkit-playsinline preload="auto"
-      poster="/poster.jpg"
+      poster="https://manaia.vercel.app/poster.jpg"
       aria-hidden="true">
-      <source src="/placeholder.mp4" type="video/mp4">
+      <source src="https://manaia.vercel.app/placeholder.mp4" type="video/mp4">
     </video>
     <img class="poster-img" id="poster-img" src="" alt="" aria-hidden="true">
     <div class="poster-bg"></div>
@@ -1129,7 +1130,7 @@
   <div class="series-visual">
     <video class="series-visual-video" id="series-video"
       autoplay muted loop playsinline preload="auto" aria-hidden="true">
-      <source src="/series.mp4" type="video/mp4">
+      <source src="https://manaia.vercel.app/series.mp4" type="video/mp4">
     </video>
     <div class="series-visual-overlay"></div>
     <div class="series-hero">
@@ -1240,8 +1241,8 @@
 <!-- ═══ TAB 3 — EPISODES ═══════════════════════════════════ -->
 <div class="tab-panel" id="panel-episodes">
   <div class="ep-hero">
-    <video class="ep-hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="/poster.jpg" aria-hidden="true">
-      <source src="/placeholder.mp4" type="video/mp4">
+    <video class="ep-hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="https://manaia.vercel.app/poster.jpg" aria-hidden="true">
+      <source src="https://manaia.vercel.app/placeholder.mp4" type="video/mp4">
     </video>
     <div class="ep-hero-overlay"></div>
     <div class="ep-hero-content">
@@ -1460,7 +1461,7 @@
     </div>
     <div class="modal-video">
       <video controls preload="none" poster="" id="modal-video-el">
-        <source src="/placeholder.mp4" type="video/mp4">
+        <source src="https://manaia.vercel.app/placeholder.mp4" type="video/mp4">
       </video>
     </div>
   </div>

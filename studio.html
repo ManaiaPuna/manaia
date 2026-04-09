@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Puna Studio</title>
+  <title>Puna Stūdio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -313,8 +313,12 @@
 
   <!-- HEADER -->
   <header class="studio-header">
-    <div class="studio-brand">Puna <span>Studio</span></div>
-    <div class="studio-user" id="header-user"></div>
+    <div class="studio-brand">Puna <span>Stūdio</span></div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="studio-user" id="header-user"></div>
+      <a href="/" id="header-view-app" style="display:none;font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--sub);text-decoration:none;opacity:0.8">← View App</a>
+      <button id="header-signout" onclick="signOut()" style="display:none;font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;background:none;border:none;color:var(--sub);cursor:pointer;padding:0;opacity:0.8">Sign Out</button>
+    </div>
   </header>
 
   <main class="studio-main">
@@ -338,7 +342,7 @@
           <div class="field-hint">We'll send you a link to sign in — no password needed.</div>
         </div>
         <button class="btn btn-primary btn-full" onclick="authSubmit()" id="auth-btn" style="margin-top:8px">
-          Enter Studio →
+          Enter Stūdio →
         </button>
       </div>
 
@@ -355,7 +359,7 @@
         <div class="auth-sub" style="margin-top:12px">Click the link in your email to enter the studio.<br>It expires in 24 hours.</div>
         <div style="margin-top:40px;padding:20px;border:1px solid var(--rule)">
           <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:12px">Email not arrived?</div>
-          <a id="direct-login-link" href="#" style="display:inline-block;background:var(--raised);color:var(--text);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;text-decoration:none">Enter Studio directly →</a>
+          <a id="direct-login-link" href="#" style="display:inline-block;background:var(--raised);color:var(--text);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:11px 20px;text-decoration:none">Enter Stūdio directly →</a>
         </div>
       </div>
     </div>
@@ -365,8 +369,8 @@
 
       <!-- Video hero -->
       <div class="dash-hero">
-        <video class="dash-hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="/poster.jpg" aria-hidden="true">
-          <source src="/series.mp4" type="video/mp4">
+        <video class="dash-hero-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="https://manaia.vercel.app/poster.jpg" aria-hidden="true">
+          <source src="https://manaia.vercel.app/series.mp4" type="video/mp4">
         </video>
         <div class="dash-hero-overlay"></div>
         <div class="dash-hero-content">
@@ -763,7 +767,7 @@
         showScreen('screen-auth-sent');
       } else {
         showToast('Something went wrong — try again.');
-        btn.textContent = 'Enter Studio →';
+        btn.textContent = 'Enter Stūdio →';
         btn.disabled = false;
       }
     } catch (_) {
@@ -795,9 +799,20 @@
   // ─── DASHBOARD ────────────────────────────────────
   function enterDashboard() {
     document.getElementById('header-user').textContent = state.user.name || state.user.email;
+    document.getElementById('header-view-app').style.display = 'block';
+    document.getElementById('header-signout').style.display = 'block';
     document.getElementById('dash-greeting').textContent = 'Kia ora, ' + (state.user.name?.split(' ')[0] || 'there') + '.';
     loadProjects();
     showScreen('screen-dashboard');
+  }
+
+  function signOut() {
+    localStorage.removeItem('puna_studio_user');
+    state.user = null;
+    document.getElementById('header-user').textContent = '';
+    document.getElementById('header-view-app').style.display = 'none';
+    document.getElementById('header-signout').style.display = 'none';
+    showScreen('screen-auth');
   }
 
   async function loadProjects() {
