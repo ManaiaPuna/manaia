@@ -1167,6 +1167,24 @@
           <div class="meta-value">2:30 each</div>
         </div>
       </div>
+      <!-- CREATOR VIDEO — Kōrero first -->
+      <div class="creator-video-block">
+        <div class="synopsis-header" style="margin-bottom:12px">
+          <span class="section-label" style="color:var(--text)">Kōrero | Message</span>
+        </div>
+        <div class="creator-video-wrap">
+          <div class="creator-thumb" id="creator-thumb">
+            <img src="/creator.jpg" alt="Message from the creator">
+            <div class="creator-thumb-overlay"></div>
+            <div class="creator-play-btn">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M6 3.5L14.5 9 6 14.5V3.5Z" fill="white"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="synopsis-toggle" onclick="this.classList.toggle('open');this.setAttribute('aria-expanded',this.classList.contains('open'))" role="button" aria-expanded="false">
         <div class="synopsis-header">
           <span class="section-label">Pūrākau | Story</span>
@@ -1187,33 +1205,6 @@
           <div class="crew-row" style="padding:6px 0;border-bottom:1px solid var(--rule)"><div class="crew-role">Executive Producer</div><div class="crew-name">Rangi Pārata</div></div>
           <div class="crew-row" style="padding:6px 0;border-bottom:1px solid var(--rule)"><div class="crew-role">Director of Photography</div><div class="crew-name">Luca Ferreira</div></div>
           <div class="crew-row" style="padding:6px 0"><div class="crew-role">Original Score</div><div class="crew-name">Tāne Māhuta Collective</div></div>
-        </div>
-      </div>
-
-      <!-- CREATOR VIDEO -->
-      <div class="creator-video-block">
-        <div class="synopsis-header" style="margin-bottom:12px">
-          <span class="section-label" style="color:var(--text)">Kōrero | Message</span>
-        </div>
-        <div class="creator-video-wrap">
-          <!-- thumbnail — click to play -->
-          <div class="creator-thumb" id="creator-thumb" onclick="playCreatorVideo()">
-            <img src="/creator.png" alt="Message from the creator">
-            <div class="creator-thumb-overlay"></div>
-            <div class="creator-play-btn">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M6 3.5L14.5 9 6 14.5V3.5Z" fill="white"/>
-              </svg>
-            </div>
-          </div>
-          <video class="creator-video" id="creator-video" controls preload="none"
-            style="display:none"
-            aria-label="Message from the creator">
-            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4">
-          </video>
-          <div class="creator-video-meta" style="display:none">
-            <div class="creator-video-name"></div>
-          </div>
         </div>
       </div>
 
